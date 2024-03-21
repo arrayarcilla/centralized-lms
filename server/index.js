@@ -11,7 +11,7 @@ const port = 3000;
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors()); // Use cors middleware to allow cross-origin requests
+app.use(cors());
 
 app.use(session({
     secret: 'ssshhhhh', //random string i guess
@@ -55,6 +55,55 @@ app.post('/create_user', (req, res) => {
         if (err) throw err
     })
 })
+
+
+//--------------------------------------ITEMS-----------------------------------------
+
+app.delete('/deleteItem', (req, res) => {
+    connection.query(`UPDATE item
+                        SET is_available = 0
+                        WHERE id = `+ req.body.id +`;`, (err, result) => {
+        res.render("product", { products: result });
+    });
+});
+
+app.post('/addItem', (req, res) => {
+    const item = req.body
+    connection.query(`INSERT INTO item (author, title, media_type, category, isbn, publisher, is_available, copies)
+    VALUES ( '`+ item.author +`', '`+ item.title +`', '`+ item.media_type +`', '`+ item.catgory +`', `+ item.isbn +`, '`+ item.publisher +`', `+ item.is_available +`, `+ item.copies +`);`, (err, result) => {
+        if (err) throw err;
+        res.redirect('product')
+    })
+})
+
+app.patch('/updateItem', (req, res) => {
+    const item = req.body
+    connection.query(`UPDATE item
+                        SET author = '`+ item.author +`',
+                            title = '`+ item.title +`',
+                            media_type = '`+ item.media_type +`',
+                            category = '`+ item.catgory +`',
+                            isbn = `+ item.isbn +`,
+                            publisher = '`+ item.publisher +`',
+                            is_available = `+ item.is_available +`,
+                            copies = `+ item.copies +`
+                        WHERE id = `+ item.id +`;`, (err, result) => {
+        if (err) throw err
+        res.send('product')
+    })
+})
+
+app.get('/getAvail', (req, res) => {
+    connection.query('SELECT * FROM item WHERE status="1"', (err, result) => {
+        res.send(result);
+    });
+});
+
+app.post('/getItem', (req, res) => {
+    connection.query(`SELECT * FROM item WHERE id="`+ req.body.id+`"`, (err, result) => {
+        res.send(result);
+    });
+});
 
 app.listen(port, () => {
     console.log('Server listening on port ' + port);
