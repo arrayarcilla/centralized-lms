@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {  useNavigate } from 'react-router-dom';
+import {  Link, useNavigate } from 'react-router-dom';
 
 import { Form, FormField, Input, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
@@ -75,6 +75,7 @@ const LoginForm = () => {
                         <FormField control={Input} name='username' label='Username' value={formData.username} onChange={handleChange} />
                         <FormField control={Input} name='password' label='Password' value={formData.password} onChange={handleChange} />
                         <FormField control={Button} name='submit' content='Submit' size='big' />
+                        <p>New to SandL? Click <Link to='/register'>here </Link> to create an account now!</p>
                     </Form>
                 </GridColumn>
             </GridRow>

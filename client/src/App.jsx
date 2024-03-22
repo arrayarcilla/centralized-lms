@@ -33,7 +33,7 @@ function App() {
         {/* Admin Routes */}
 
         <Route path='/' element={<LandingPage />} />
-        <Route path='/signup' element={<SignUp />} />
+        <Route path='/register' element={<SignUp />} />
 
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/catalog' element={<Catalog />} />
