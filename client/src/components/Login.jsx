@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from 'react-router-dom';
 
-import { Form, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, FormGroup, FormInput, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
-const RegisterForm = () => (
+const LoginForm = () => (
 
     <Grid container>
         <GridRow centered>
@@ -16,7 +16,7 @@ const RegisterForm = () => (
 
         <GridRow centered>
             <GridColumn textAlign="left" width={8}>
-            <p>To start using SandL, make sure you have the MetaMask browser extension installed. Connect your MetaMask wallet by clicking the 'Connect MetaMask' button below. </p>
+            <p>SandL is a Centralized Library Management System where you can browse a collection of books and choose to borrow them.</p>
             </GridColumn>
         </GridRow>
 
@@ -28,9 +28,16 @@ const RegisterForm = () => (
             <GridColumn width={3}>
                 <Image src="logo.png" size="small" floated="right"/>
             </GridColumn>
-            <GridColumn width={4} verticalAlign="middle">
-                <Form>
-                    <Link to='/dashboard'><Button type="submit" content='Connect MetaMask' size='big' /></Link>
+            <GridColumn width={5} verticalAlign="left">
+                <Form autoComplete='off'>
+                    <FormInput label='Username'/>
+                    <FormInput label='Password' type='password' />
+                    <Grid>
+                        <GridRow>
+                            <GridColumn width={4}><Link to='/dashboard'><Button type='submit' content='Login'/></Link></GridColumn>
+                            <GridColumn width={11}><p>New to SandL? <Link to='/signup'>Sign Up</Link> here.</p></GridColumn>
+                        </GridRow>
+                    </Grid>
                 </Form>
             </GridColumn>
         </GridRow>  
@@ -38,4 +45,4 @@ const RegisterForm = () => (
     
 )
 
-export default RegisterForm;
+export default LoginForm;

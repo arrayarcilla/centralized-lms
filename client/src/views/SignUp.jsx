@@ -1,15 +1,14 @@
 import React from 'react';
-import Login from '../../components/Login.jsx';
+import RegisterForm from '../components/Signup.jsx';
 
-function LandingPage() {
+function SignUp() {
     return (
         <>
-           
             <div className='landing-content'>
-                <Login/>
+                <RegisterForm/>
             </div>
         </>
     );
 }
 
-export default LandingPage;
+export default SignUp;
