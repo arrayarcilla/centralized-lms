@@ -70,9 +70,9 @@ function AdminCatalogSearch() {
                 <GridRow>
                     <GridColumn width={1}/>
                     <GridColumn width={15} textAlign='right'>
-                        <Button content='Manual Add' link to='/add-item' color='blue' basic />
-                        <Button content='Authors' link to='/authors' color='blue' basic />
-                        <Button content='Publishers' link to='/publishers' color='blue' basic />
+                        <Button content='Manual Add' as={Link} to='/add-item' color='blue' basic />
+                        <Button content='Authors' as={Link} to='/authors' color='blue' basic />
+                        <Button content='Publishers' as={Link} to='/publishers' color='blue' basic />
                         <Popup
                             content={
                                 <Menu vertical>

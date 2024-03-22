@@ -156,7 +156,7 @@ hr {
 /* ---------------- CUSTOM STYLES ------------------ */
 
 .form-description {
-  margin-top: -1em;
+  margin-top: -1em !important;
 }
 
 .admin-page-content {

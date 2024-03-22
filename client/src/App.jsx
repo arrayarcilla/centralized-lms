@@ -2,9 +2,10 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 //--- Views Imports
-//-- Admin Views
-import LandingPage from './views/AdminViews/LandingPage';
+import LandingPage from './views/LandingPage';
+import SignUp from './views/SignUp';
 
+//-- Admin Views
 import Dashboard from './views/AdminViews/Dashboard';
 import Catalog from './views/AdminViews/Catalog';
 import AddItem from './views/AdminViews/AddItem';
@@ -32,6 +33,7 @@ function App() {
         {/* Admin Routes */}
 
         <Route path='/' element={<LandingPage />} />
+        <Route path='/signup' element={<SignUp />} />
 
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/catalog' element={<Catalog />} />
