@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { Link } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
 
-import { Form, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, FormField, Input, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
-const RegisterForm = () => {
+const LoginForm = () => {
     const [formData, setFormData] = useState({
         username: "",
         password: ""
     });
+
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,8 +28,14 @@ const RegisterForm = () => {
             });
             console.log("response: ", response);
             if (response.ok) {
-                // console.log('Data submitted successfully');
-                // // Redirect or show success message here
+
+                console.log('Data submitted successfully');
+                
+                // if admin,
+                navigate('/dashboard')
+
+                // if member,
+                // navigate('/home')
             } else {
                 // console.error('Error submitting data');
                 // // Handle error scenario
@@ -50,7 +58,7 @@ const RegisterForm = () => {
 
             <GridRow centered>
                 <GridColumn textAlign="left" width={8}>
-                    <p>To start using SandL, make sure you have the MetaMask browser extension installed. Connect your MetaMask wallet by clicking the 'Connect MetaMask' button below. </p>
+                    <p>SandL library is an online library management system that allows you to borrow books anytime from our wide collection!</p>
                 </GridColumn>
             </GridRow>
 
@@ -62,21 +70,16 @@ const RegisterForm = () => {
                 <GridColumn width={3}>
                     <Image src="logo.png" size="small" floated="right"/>
                 </GridColumn>
-                <GridColumn width={4} verticalAlign="middle">
+                <GridColumn width={5}>
                     <Form onSubmit={handleSubmit}>
-                        <Link to='/dashboard'><Button type="submit" content='Connect MetaMask' size='big' /></Link>
+                        <FormField control={Input} name='username' label='Username' value={formData.username} onChange={handleChange} />
+                        <FormField control={Input} name='password' label='Password' value={formData.password} onChange={handleChange} />
+                        <FormField control={Button} name='submit' content='Submit' size='big' />
                     </Form>
                 </GridColumn>
             </GridRow>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="">Username:</label>
-                <input type="text" name="username" value={formData.username} onChange={handleChange} />
-                <label htmlFor="">Password:</label>
-                <input type="password" name="password" value={formData.password} onChange={handleChange} />
-                <button type="submit">Submit</button>
-            </form>
         </Grid>
     );
 };
 
-export default RegisterForm;
+export default LoginForm;
