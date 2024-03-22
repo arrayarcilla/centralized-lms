@@ -9,8 +9,7 @@ const LoginForm = () => {
         password: ""
     });
 
-    const navigate = useNavigate();
-
+    const navigate = useNavigate(); // useNavigate renders a React page
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         // console.log(formData); // For testing
@@ -28,7 +27,7 @@ const LoginForm = () => {
                 body: JSON.stringify(formData)
             });
             if ( response.ok ) {
-                navigate('/dashboard');
+                // navigate('/dashboard'); // Will redirect to dashboard
             } else {
                 // Handle error scenario
             }
