@@ -1,73 +1,82 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
-import { Form, FormGroup, FormInput, FormButton, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
-const LoginForm = () => {
-    const [formData, setFormData] = useState ({
+const RegisterForm = () => {
+    const [formData, setFormData] = useState({
         username: "",
         password: ""
     });
 
-    const navigate = useNavigate(); // useNavigate renders a React page
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        // console.log(formData); // For testing
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('formData: ', formData);
+        console.log("formData: ",formData);
         try {
-            const response = await fetch( 'http://localhost:3000/', { 
+            const response = await fetch('http://localhost:3000/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData) // Stringify the formData
             });
-            if ( response.ok ) {
-                // navigate('/dashboard'); // Will redirect to dashboard
+            console.log("response: ", response);
+            if (response.ok) {
+                // console.log('Data submitted successfully');
+                // // Redirect or show success message here
             } else {
-                // Handle error scenario
+                // console.error('Error submitting data');
+                // // Handle error scenario
             }
-        } catch ( error ) {
-            console.error('Error submitting data: '. error);
+        } catch (error) {
+            console.error('Error submitting data:', error);
             // Handle error scenario
         }
     };
 
     return (
-        <Grid>
+        <Grid container>
+            <GridRow centered>
+                <GridColumn textAlign="center" width={8}>
+                    <Header as="h1">SandL Library</Header>
+                </GridColumn>
+            </GridRow>
+
+            <Divider width={1}/>
+
             <GridRow centered>
                 <GridColumn textAlign="left" width={8}>
-                <p>SandL is a Centralized Library Management System where you can browse a collection of books and choose to borrow them.</p>
+                    <p>To start using SandL, make sure you have the MetaMask browser extension installed. Connect your MetaMask wallet by clicking the 'Connect MetaMask' button below. </p>
                 </GridColumn>
             </GridRow>
 
             <Divider />
-            
+
             <GridRow>
             </GridRow>
             <GridRow centered>
                 <GridColumn width={3}>
                     <Image src="logo.png" size="small" floated="right"/>
                 </GridColumn>
-                <GridColumn width={5}>
-                    <Form autoComplete='off' onSubmit={ handleSubmit }>
-                        <FormInput name='username' label='Username' onChange={ handleChange } />
-                        <FormInput name='password' label='Password' type='password' onChange={ handleChange } />
-                        <Grid>
-                            <GridRow>
-                                <GridColumn width={4}><FormButton type='submit' content='Login' /></GridColumn>
-                                <GridColumn width={11}><p>New to SandL? <Link to='/signup'>Sign Up</Link> here.</p></GridColumn>
-                            </GridRow>
-                        </Grid>
+                <GridColumn width={4} verticalAlign="middle">
+                    <Form onSubmit={handleSubmit}>
+                        <Link to='/dashboard'><Button type="submit" content='Connect MetaMask' size='big' /></Link>
                     </Form>
                 </GridColumn>
-            </GridRow>  
+            </GridRow>
+            <form onSubmit={handleSubmit}>
+                <label htmlFor="">Username:</label>
+                <input type="text" name="username" value={formData.username} onChange={handleChange} />
+                <label htmlFor="">Password:</label>
+                <input type="password" name="password" value={formData.password} onChange={handleChange} />
+                <button type="submit">Submit</button>
+            </form>
         </Grid>
     );
 };
 
-export default LoginForm;
+export default RegisterForm;
