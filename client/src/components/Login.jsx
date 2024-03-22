@@ -1,48 +1,74 @@
-import React from "react";
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
 
-import { Form, FormGroup, FormInput, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, FormGroup, FormInput, FormButton, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
-const LoginForm = () => (
+const LoginForm = () => {
+    const [formData, setFormData] = useState ({
+        username: "",
+        password: ""
+    });
 
-    <Grid container>
-        <GridRow centered>
-            <GridColumn textAlign="center" width={8}>
-                <Header as="h1">SandL Library</Header>
-            </GridColumn>
-        </GridRow>
+    const navigate = useNavigate();
 
-        <Divider width={1}/>
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+        // console.log(formData); // For testing
+    };
 
-        <GridRow centered>
-            <GridColumn textAlign="left" width={8}>
-            <p>SandL is a Centralized Library Management System where you can browse a collection of books and choose to borrow them.</p>
-            </GridColumn>
-        </GridRow>
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        console.log('formData: ', formData);
+        try {
+            const response = await fetch( 'http://localhost:3000/', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+            if ( response.ok ) {
+                navigate('/dashboard');
+            } else {
+                // Handle error scenario
+            }
+        } catch ( error ) {
+            console.error('Error submitting data: '. error);
+            // Handle error scenario
+        }
+    };
 
-        <Divider />
-        
-        <GridRow>
-        </GridRow>
-        <GridRow centered>
-            <GridColumn width={3}>
-                <Image src="logo.png" size="small" floated="right"/>
-            </GridColumn>
-            <GridColumn width={5} verticalAlign="left">
-                <Form autoComplete='off'>
-                    <FormInput label='Username'/>
-                    <FormInput label='Password' type='password' />
-                    <Grid>
-                        <GridRow>
-                            <GridColumn width={4}><Link to='/dashboard'><Button type='submit' content='Login'/></Link></GridColumn>
-                            <GridColumn width={11}><p>New to SandL? <Link to='/signup'>Sign Up</Link> here.</p></GridColumn>
-                        </GridRow>
-                    </Grid>
-                </Form>
-            </GridColumn>
-        </GridRow>  
-    </Grid>
-    
-)
+    return (
+        <Grid>
+            <GridRow centered>
+                <GridColumn textAlign="left" width={8}>
+                <p>SandL is a Centralized Library Management System where you can browse a collection of books and choose to borrow them.</p>
+                </GridColumn>
+            </GridRow>
+
+            <Divider />
+            
+            <GridRow>
+            </GridRow>
+            <GridRow centered>
+                <GridColumn width={3}>
+                    <Image src="logo.png" size="small" floated="right"/>
+                </GridColumn>
+                <GridColumn width={5}>
+                    <Form autoComplete='off' onSubmit={ handleSubmit }>
+                        <FormInput name='username' label='Username' onChange={ handleChange } />
+                        <FormInput name='password' label='Password' type='password' onChange={ handleChange } />
+                        <Grid>
+                            <GridRow>
+                                <GridColumn width={4}><FormButton type='submit' content='Login' /></GridColumn>
+                                <GridColumn width={11}><p>New to SandL? <Link to='/signup'>Sign Up</Link> here.</p></GridColumn>
+                            </GridRow>
+                        </Grid>
+                    </Form>
+                </GridColumn>
+            </GridRow>  
+        </Grid>
+    );
+};
 
 export default LoginForm;
