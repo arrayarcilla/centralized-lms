@@ -17,35 +17,39 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("formData: ",formData);
         try {
             const response = await fetch('http://localhost:3000/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData) // Stringify the formData
+                body: JSON.stringify(formData)
             });
-            console.log("response: ", response);
             if (response.ok) {
-
-                console.log('Data submitted successfully');
-                
-                // if admin,
-                navigate('/dashboard')
-
-                // if member,
-                // navigate('/home')
+                const data = await response.json();
+                console.log('Response data:', data); // Log the entire response data
+                if (data.usertype) {
+                    console.log('Type of usertype:', typeof data.usertype);
+                    console.log('User type:', data.usertype);
+                    if (data.usertype.toLowerCase() === "admin") {
+                        console.log("this is the admin");
+                        navigate('/dashboard');
+                    } else if (data.usertype.toLowerCase() === "member") {
+                        console.log("this is the member");
+                        navigate('/home');
+                    } else {
+                        console.log("not registered")
+                    }
+                } else {
+                    console.error('Usertype not found in response');
+                }
             } else {
-                // console.error('Error submitting data');
-                // // Handle error scenario
+                console.error('Error submitting data');
             }
         } catch (error) {
             console.error('Error submitting data:', error);
-            // Handle error scenario
         }
     };
-
     return (
         <Grid container>
             <GridRow centered>
