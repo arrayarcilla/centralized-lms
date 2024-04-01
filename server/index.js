@@ -94,11 +94,30 @@ app.patch('/updateItem', (req, res) => {
     })
 })
 
-app.get('/getAvail', (req, res) => {
-    connection.query('SELECT * FROM item WHERE status="1"', (err, result) => {
-        res.send(result);
+// app.get('/getAvail', (req, res) => {
+//     connection.query('SELECT * FROM item WHERE status="1"', (err, result) => {
+//         res.send(result);
+//     });
+// });
+
+// Route to get items with pagination
+app.get('/items', (req, res) => {
+    const page = req.query.page || 1; // Default to first page if not provided
+    const limit = 10; // Number of items per page
+    const offset = (page - 1) * limit; // Calculate offset
+  
+    const query = `SELECT * FROM item LIMIT ${limit} OFFSET ${offset}`;
+  
+    connection.query(query, (err, results) => {
+      if (err) {
+        console.error('Error retrieving items:', err);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+      }
+      res.json(results);
     });
-});
+  });
+  
 
 app.post('/getItem', (req, res) => {
     connection.query(`SELECT * FROM item WHERE id="`+ req.body.id+`"`, (err, result) => {
