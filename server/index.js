@@ -114,6 +114,8 @@ app.get('/items', (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
         return;
       }
+      
+      res.setHeader('Content-Type', 'application/json');
       res.json(results);
     });
   });
