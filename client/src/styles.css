@@ -157,6 +157,7 @@ hr {
 
 .form-description {
   margin-top: -1em !important;
+  font-style: italic;
 }
 
 .admin-page-content {

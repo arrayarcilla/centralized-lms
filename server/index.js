@@ -11,7 +11,9 @@ const port = 3000;
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3001'
+}));
 
 app.use(session({
     secret: 'ssshhhhh', //random string i guess
@@ -28,6 +30,7 @@ const connection = mysql.createConnection({
 
 app.post('/', (req, res) => {
     const sesh = req.session;
+    
     connection.query('SELECT * FROM user WHERE name="' + req.body.username + '"', (err, result) => {
         if (result.length != 0 && bcrypt.compareSync(req.body.password, result[0]['password'])) {
             sesh.id = result[0].id;
@@ -40,8 +43,8 @@ app.post('/', (req, res) => {
                 res.json({ usertype: "member" });
             }
         } else {
-            res.send(" ");
-            throw err;
+            res.send({ })
+            throw err
         }
     })
 })
@@ -52,8 +55,10 @@ app.post('/create_user', (req, res) => {
     let salt = bcrypt.genSaltSync(saltRounds);
     let hash = bcrypt.hashSync(req.body.password, salt);
     console.log("hash: ", hash)
+
     connection.query('INSERT INTO user (name, password, userType) VALUES ("' + req.body.username + '","' + hash + '","' + usertype + '")', (err, result) => {
         if (err) throw err
+        res.json({success: true})
     })
 })
 

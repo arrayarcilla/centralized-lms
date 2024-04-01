@@ -1,52 +1,116 @@
-import React from "react";
-import { Link } from 'react-router-dom';
+import React, {useState} from "react";
+import { Link, useNavigate } from 'react-router-dom';
 
-import { Form, FormGroup, FormInput, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, FormGroup, FormField, Input, Button, Message, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
-const RegisterForm = () => (
+const RegisterForm = () => {
+    const [formData, setFormData] = useState({
+        username: "",
+        password: "",
+        confirmp: "",
+    });
 
-    <Grid container>
-        <GridRow centered>
-            <GridColumn textAlign="center" width={8}>
-                <Header as="h1">Register Account</Header>
-            </GridColumn>
-        </GridRow>
+    const [passError, setPassError] = useState(false)
+    const [fieldError, setFieldError] = useState(false)
 
-        <Divider width={1}/>
+    const navigate = useNavigate();
 
-        <GridRow centered>
-            <GridColumn textAlign="left" width={8}>
-            <p >Fill up the fields below to register and create your account, then you can start using SandL Library!</p>
-            </GridColumn>
-        </GridRow>
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
 
-        <Divider />
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        console.log(formData)
+
+        if (formData.username === '' || formData.password === '' || formData.confirmp === '') {
+            console.error('Missing form data')
+            setFieldError(true)
+        } else {
+            if (formData.password != formData.confirmp) {
+                console.error('Passwords do not match')
+                setPassError(true)
+            } else {
+                try {
+                    const response = await fetch('http://localhost:3000/create_user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+
+                        if (data.success) {
+                            console.log('Registration successful.');
+                            navigate('/');
+                        } else {
+                            console.error('Registration failed.');
+                        }
+                    } else {
+                        console.error('Error submitting data');
+                    }
+                } catch (err) {
+                    console.error('Error: ', err)
+                }
+            }
+        }
+
         
-        <GridRow>
-        </GridRow>
-        <GridRow centered>
-            <GridColumn width={3}>
-                <Image src="logo.png" size="small" floated="right"/>
-            </GridColumn>
-            <GridColumn width={5} verticalAlign="left">
-                <Form autoComplete='off'>
-                    <FormInput label='Username' placeholder='Username'/>
-                    <p className="form-description">Please choose a unique username.</p>
-                    <FormInput label='Password' placeholder='Password' type='password' />
-                    <p className="form-description">Please enter your password.</p>
-                    <FormInput label='Confirm Password' placeholder='Confirm Password' type='password' />
-                    <p className="form-description">Confirm your password by entering it again.</p>
-                    <Grid>
-                        <GridRow>
-                            <GridColumn width={7}><Link to='/dashboard'><Button type='submit' content='Create my account'/></Link></GridColumn>
-                            <GridColumn width={9}><p>Already have an account?<Link to='/'>Log in</Link> here.</p></GridColumn>
-                        </GridRow>
-                    </Grid>
-                </Form>
-            </GridColumn>
-        </GridRow>  
-    </Grid>
+
+
+       
+    }
     
-)
+
+    return(
+        <Grid container>
+            <GridRow centered>
+                <GridColumn textAlign="center" width={8}>
+                    <Header as="h1">Register Account</Header>
+                </GridColumn>
+            </GridRow>
+
+            <Divider width={1}/>
+
+            <GridRow centered>
+                <GridColumn textAlign="left" width={8}>
+                <p >Fill up the fields below to register and create your account, then you can start using SandL Library!</p>
+                </GridColumn>
+            </GridRow>
+
+            <Divider />
+            
+            <GridRow>
+            </GridRow>
+            <GridRow centered>
+                <GridColumn width={3}>
+                    <Image src="logo.png" size="small" floated="right"/>
+                </GridColumn>
+                <GridColumn width={5}>
+                    <Form onSubmit={handleSubmit}>
+                        <FormField control={Input} name='username' label='Username' placeholder='Username' onChange={handleChange}/>
+                        <p className="form-description">Please choose a unique username.</p>
+                        <FormField control={Input} name='password' label='Password' placeholder='Password' onChange={handleChange} type='password' />
+                        <p className="form-description">Please enter your password.</p>
+                        <FormField control={Input} name='confirmp' label='Confirm Password' placeholder='Confirm Password' onChange={handleChange} type='password' />
+                        <p className="form-description">Confirm your password by entering it again.</p>
+                        <Grid>
+                            <GridRow>
+                                <GridColumn width={7}><FormField control={Button} name='submit' content='Create My Account' size='large' /></GridColumn>
+                                <GridColumn width={9}><p>Already have an account?<Link to='/'>Log in</Link> here.</p></GridColumn>
+                            </GridRow>
+                        </Grid>
+                    </Form>
+                    {fieldError && <Message error icon='warning sign' header='Incomplete Information' content='Please fill up all fields to continue registration' />}
+                    {passError && <Message error icon='warning sign' header='Invalid Password' content='Passwords do not match, please confirm your password by re-entering it.' />}
+                </GridColumn>
+            </GridRow>  
+        </Grid>
+    );
+    
+}
 
 export default RegisterForm;

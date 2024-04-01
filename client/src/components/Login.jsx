@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import {  Link, useNavigate } from 'react-router-dom';
 
-import { Form, FormField, Input, Button, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, FormField, Input, Button, Message, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
 const LoginForm = () => {
     const [formData, setFormData] = useState({
         username: "",
         password: ""
     });
+
+    const [loginError, setLoginError] = useState(false);
 
     const navigate = useNavigate();
 
@@ -17,6 +19,7 @@ const LoginForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
             const response = await fetch('http://localhost:3000/', {
                 method: 'POST',
@@ -37,17 +40,16 @@ const LoginForm = () => {
                     } else if (data.usertype.toLowerCase() === "member") {
                         console.log("this is the member");
                         navigate('/home');
-                    } else {
-                        console.log("not registered")
                     }
                 } else {
-                    console.error('Usertype not found in response');
+                    console.error('Invalid login'); // Render error message
+                    setLoginError(true);
                 }
             } else {
                 console.error('Error submitting data');
             }
         } catch (error) {
-            console.error('Error submitting data:', error);
+            console.error('Error: ', error);
         }
     };
     return (
@@ -73,14 +75,16 @@ const LoginForm = () => {
             <GridRow centered>
                 <GridColumn width={3}>
                     <Image src="logo.png" size="small" floated="right"/>
+                    
                 </GridColumn>
                 <GridColumn width={5}>
                     <Form onSubmit={handleSubmit}>
                         <FormField control={Input} name='username' label='Username' value={formData.username} onChange={handleChange} />
-                        <FormField control={Input} name='password' label='Password' value={formData.password} onChange={handleChange} />
+                        <FormField control={Input} name='password' label='Password' value={formData.password} onChange={handleChange} type='password'/>
                         <FormField control={Button} name='submit' content='Submit' size='big' />
                         <p>New to SandL? Click <Link to='/register'>here </Link> to create an account now!</p>
                     </Form>
+                    {loginError && <Message error icon='warning sign' header='Login Failed' content='Please check your username and password and try again.' />}
                 </GridColumn>
             </GridRow>
         </Grid>
