@@ -119,6 +119,24 @@ app.get('/items', (req, res) => {
       res.json(results);
     });
   });
+
+  // Route to handle search
+app.get('/search', (req, res) => {
+    const searchQuery = req.query.search; // Assuming the search term is provided as 'q' query parameter
+    const sqlQuery = `
+      SELECT *
+      FROM item
+      WHERE title LIKE '%${searchQuery}%' OR author LIKE '%${searchQuery}%' OR publisher LIKE '%${searchQuery}%'
+    `;
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.error('Error executing MySQL query: ' + err.stack);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+      }
+      res.json(results);
+    });
+  });
   
 
 app.post('/getItem', (req, res) => {
