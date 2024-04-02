@@ -101,24 +101,34 @@ app.patch('/updateItem', (req, res) => {
 // });
 
 // Route to get items with pagination
-app.get('/items', (req, res) => {
-    const page = req.query.page || 1; // Default to first page if not provided
-    const limit = 10; // Number of items per page
-    const offset = (page - 1) * limit; // Calculate offset
-  
-    const query = `SELECT * FROM item LIMIT ${limit} OFFSET ${offset}`;
-  
-    connection.query(query, (err, results) => {
-      if (err) {
-        console.error('Error retrieving items:', err);
+app.get('/items', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const offset = (page - 1) * limit;
+    
+        if (isNaN(page) || page < 1) {
+            throw new Error('Invalid page number');
+        }
+
+        const query = `SELECT * FROM item LIMIT ${limit} OFFSET ${offset}`;
+    
+        const results = await new Promise((resolve, reject) => {
+            connection.query(query, (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error retrieving items:', error);
         res.status(500).json({ error: 'Internal server error' });
-        return;
-      }
-      
-      res.setHeader('Content-Type', 'application/json');
-      res.json(results);
-    });
-  });
+    }
+});
 
   // Route to handle search
 app.get('/search', (req, res) => {

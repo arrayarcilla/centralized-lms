@@ -11,31 +11,38 @@ const AdminCatalogTable = () => {
 	const [isLoading, setIsLoading] = useState([false]); //state for loading indicator
 	const [error, setError] = useState(null); //state to hold any error
 
-	useEffect(() => {
-		const fetchItems = async () => {
-			setIsLoading(true);
-			setError(null); //clear any previous errors
+	let page = 6;
 
-			try {
-				const response = await fetch('/items');
+    const fetchItems = async (page) => {
+        try {
+            const response = await fetch(`http://localhost:3000/items?page=${page}`);
+            
+            if (!response.ok) {
+                throw new Error(`Error fetching items: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching items:', error.message);
+            throw new Error('Failed to fetch items');
+        }
+    };
 
-				if (!response.ok) {
-					throw new Error('Error fetching items: ', response.status)
-				}
-				
-				const data = await response.json();
-				console.log(data)
-				setItems(data);
-			} catch (error) {
-				console.error('Error encountered when fetching items:', error);
-				setError('Failed to load book data. Please try again later.');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchItems(); //execute fetch data on component mount
-	}, []); //empty dependency array to fetch data only once on mount
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const data = await fetchItems(page);
+                setItems(data);
+                setIsLoading(false);
+            } catch (error) {
+                setError(error.message);
+                setIsLoading(false);
+            }
+        };
+        
+        fetchData();
+    }, []);
 
     return (
 			<>
@@ -70,6 +77,7 @@ const AdminCatalogTable = () => {
 						) : (
 							items.map((item) => (
 								<TableRow key={item.id}>
+									<TableCell>{item.id}</TableCell>
 									<TableCell>{item.author}</TableCell>
 									<TableCell>{item.title}</TableCell>
 									<TableCell>{item.category}</TableCell>
