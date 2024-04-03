@@ -99,11 +99,60 @@ app.patch('/updateItem', (req, res) => {
     })
 })
 
-app.get('/getAvail', (req, res) => {
-    connection.query('SELECT * FROM item WHERE status="1"', (err, result) => {
-        res.send(result);
-    });
+// app.get('/getAvail', (req, res) => {
+//     connection.query('SELECT * FROM item WHERE status="1"', (err, result) => {
+//         res.send(result);
+//     });
+// });
+
+// Route to get items with pagination
+app.get('/items', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 10;
+        const offset = (page - 1) * limit;
+    
+        if (isNaN(page) || page < 1) {
+            throw new Error('Invalid page number');
+        }
+
+        const query = `SELECT * FROM item LIMIT ${limit} OFFSET ${offset}`;
+    
+        const results = await new Promise((resolve, reject) => {
+            connection.query(query, (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        res.status(200).json(results);
+    } catch (error) {
+        console.error('Error retrieving items:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
+
+  // Route to handle search
+app.get('/search', (req, res) => {
+    const searchQuery = req.query.search; // Assuming the search term is provided as 'q' query parameter
+    const sqlQuery = `
+      SELECT *
+      FROM item
+      WHERE title LIKE '%${searchQuery}%' OR author LIKE '%${searchQuery}%' OR publisher LIKE '%${searchQuery}%'
+    `;
+    connection.query(sqlQuery, (err, results) => {
+      if (err) {
+        console.error('Error executing MySQL query: ' + err.stack);
+        res.status(500).json({ error: 'Internal server error' });
+        return;
+      }
+      res.json(results);
+    });
+  });
+  
 
 app.post('/getItem', (req, res) => {
     connection.query(`SELECT * FROM item WHERE id="`+ req.body.id+`"`, (err, result) => {
