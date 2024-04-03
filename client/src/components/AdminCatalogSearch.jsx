@@ -76,22 +76,22 @@ function AdminCatalogSearch() {
                         <Popup
                             content={
                                 <Menu vertical>
-                                    <MenuItem content='All Media Types' link onClick={ handleFilterClick } />
-                                    <MenuItem content='Books' link onClick={ handleFilterClick } />
-                                    <MenuItem content='Ebooks' link onClick={ handleFilterClick } />
-                                    <MenuItem content='Magazines' link onClick={ handleFilterClick } />
-                                    <MenuItem content='Newspapers' link onClick={ handleFilterClick } />
-                                    <MenuItem content='Publications' link onClick={ handleFilterClick } />
-                                    <MenuItem content='Thesis' link onClick={ handleFilterClick } />
+                                    <MenuItem content='All Media Types' onClick={ handleFilterClick } />
+                                    <MenuItem content='Books' onClick={ handleFilterClick } />
+                                    <MenuItem content='Ebooks' onClick={ handleFilterClick } />
+                                    <MenuItem content='Magazines' onClick={ handleFilterClick } />
+                                    <MenuItem content='Newspapers' onClick={ handleFilterClick } />
+                                    <MenuItem content='Publications' onClick={ handleFilterClick } />
+                                    <MenuItem content='Thesis' onClick={ handleFilterClick } />
                                 </Menu>
                             }
                             className='filter-menu'
                             on='click'
                             pinned
                             position='bottom left'
-                            trigger={ <Button content={ filterBtnLabel } link color='blue' icon='angle down' basic/> }
+                            trigger={ <Button content={ filterBtnLabel } color='blue' icon='angle down' basic/> }
                         />
-                        <Button content='Refresh' link color='blue' icon='refresh' basic />
+                        <Button content='Refresh' color='blue' icon='refresh' basic />
                     </GridColumn>
                 </GridRow>
                 

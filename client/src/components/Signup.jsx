@@ -28,7 +28,7 @@ const RegisterForm = () => {
             console.error('Missing form data')
             setFieldError(true)
         } else {
-            if (formData.password != formData.confirmp) {
+            if (formData.password !== formData.confirmp) {
                 console.error('Passwords do not match')
                 setPassError(true)
             } else {
