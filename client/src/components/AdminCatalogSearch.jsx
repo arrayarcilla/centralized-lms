@@ -2,6 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+//--- Component Imports
+import AddItemModal from './AddItemModal';
+
 //--- Other Imports
 import { 
     Segment, 
@@ -17,21 +20,6 @@ import {
 	} from 'semantic-ui-react';
 
 function AdminCatalogSearch() {
-    const [filterBtnLabel, setfilterBtnLabel] = useState('All Media Types');
-    const handleFilterClick = (e, { content }) => setfilterBtnLabel(content);
-
-    const searchOptions = [
-		{ text: 'Default', value: 'default' },
-		{ text: 'Id', value: 'id' },
-		{ text: 'Title', value: 'title' },
-		{ text: 'Accession No.', value: 'acc-no' },
-		{ text: 'Call No.', value: 'call-no' },
-		{ text: 'ISBN', value: 'isbn' },
-		{ text: 'Author', value: 'author' },
-		{ text: 'Publisher', value: 'publisher' },
-		{ text: 'Category', value: 'category' },
-		{ text: 'Tags', value: 'tags' },
-	]
 
     return (
         
@@ -44,7 +32,6 @@ function AdminCatalogSearch() {
                         <Segment floated='right'>
                             <Form>
                                 <FormGroup>
-                                    <FormSelect options={ searchOptions } placeholder='Default'/>
                                     <FormInput />
                                     <FormButton content='Search' primary />
                                 </FormGroup>
@@ -57,7 +44,6 @@ function AdminCatalogSearch() {
                     <GridColumn width={13}>
                         <Segment floated='left'>
                             <Form>
-                                <FormSelect options={ searchOptions } placeholder='Default'/>
                                 <FormInput />
                                 <FormButton content='Search' primary />
                             </Form>
@@ -70,27 +56,9 @@ function AdminCatalogSearch() {
                 <GridRow>
                     <GridColumn width={1}/>
                     <GridColumn width={15} textAlign='right'>
-                        <Button content='Manual Add' as={Link} to='/add-item' color='blue' basic />
+                        <AddItemModal />
                         <Button content='Authors' as={Link} to='/authors' color='blue' basic />
                         <Button content='Publishers' as={Link} to='/publishers' color='blue' basic />
-                        <Popup
-                            content={
-                                <Menu vertical>
-                                    <MenuItem content='All Media Types' onClick={ handleFilterClick } />
-                                    <MenuItem content='Books' onClick={ handleFilterClick } />
-                                    <MenuItem content='Ebooks' onClick={ handleFilterClick } />
-                                    <MenuItem content='Magazines' onClick={ handleFilterClick } />
-                                    <MenuItem content='Newspapers' onClick={ handleFilterClick } />
-                                    <MenuItem content='Publications' onClick={ handleFilterClick } />
-                                    <MenuItem content='Thesis' onClick={ handleFilterClick } />
-                                </Menu>
-                            }
-                            className='filter-menu'
-                            on='click'
-                            pinned
-                            position='bottom left'
-                            trigger={ <Button content={ filterBtnLabel } color='blue' icon='angle down' basic/> }
-                        />
                         <Button content='Refresh' color='blue' icon='refresh' basic />
                     </GridColumn>
                 </GridRow>

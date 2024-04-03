@@ -11,7 +11,7 @@ const AdminCatalogTable = () => {
 	const [isLoading, setIsLoading] = useState([false]); //state for loading indicator
 	const [error, setError] = useState(null); //state to hold any error
 
-	let page = 6;
+	let page = 1;
 
     const fetchItems = async (page) => {
         try {

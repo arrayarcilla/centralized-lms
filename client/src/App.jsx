@@ -8,7 +8,6 @@ import SignUp from './views/SignUp';
 //-- Admin Views
 import Dashboard from './views/AdminViews/Dashboard';
 import Catalog from './views/AdminViews/Catalog';
-import AddItem from './views/AdminViews/AddItem';
 import Authors from './views/AdminViews/Authors';
 import Publishers from './views/AdminViews/Publishers';
 import Tags from './views/AdminViews/Tags';
@@ -37,7 +36,6 @@ function App() {
 
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/catalog' element={<Catalog />} />
-        <Route path='/add-item' element={<AddItem />} />
         <Route path='/authors' element={<Authors />} />
         <Route path='/publishers' element={<Publishers />} />
         <Route path='/tags' element={<Tags />} />

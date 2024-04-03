@@ -32,14 +32,38 @@ function BookInfoModal() {
 
                     <Table definition>
                         <TableBody>
-                            <TableRow><TableCell>Id</TableCell>         <TableCell>103</TableCell></TableRow>
-                            <TableRow><TableCell>Title</TableCell>      <TableCell>20,000 Leagues Under the Sea</TableCell></TableRow>
-                            <TableRow><TableCell>Author</TableCell>     <TableCell>Verne, Jules</TableCell></TableRow>
-                            <TableRow><TableCell>Category</TableCell>   <TableCell>Fiction</TableCell></TableRow>
-                            <TableRow><TableCell>ISBN</TableCell>       <TableCell>1603400370</TableCell></TableRow>
-                            <TableRow><TableCell>Publisher</TableCell>  <TableCell>Waldman Publishing Corp.</TableCell></TableRow>
-                            <TableRow><TableCell>Year</TableCell>       <TableCell>2008</TableCell></TableRow>
-                            <TableRow><TableCell>Copies</TableCell>     <TableCell>3</TableCell></TableRow>
+                            <TableRow>
+                                <TableCell>Id</TableCell>
+                                <TableCell>103</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Title</TableCell>
+                                <TableCell>20,000 Leagues Under the Sea</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Author</TableCell>
+                                <TableCell>Verne, Jules</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Category</TableCell>
+                                <TableCell>Fiction</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>ISBN</TableCell>
+                                <TableCell>1603400370</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Publisher</TableCell>
+                                <TableCell>Waldman Publishing Corp.</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Year</TableCell>
+                                <TableCell>2008</TableCell>
+                            </TableRow>
+                            <TableRow>
+                                <TableCell>Copies</TableCell>
+                                <TableCell>3</TableCell>
+                            </TableRow>
                         </TableBody>
                     </Table>
 
