@@ -75,11 +75,17 @@ app.delete('/deleteItem', (req, res) => {
 
 app.post('/addItem', (req, res) => {
     const item = req.body
-    connection.query(`INSERT INTO item (author, title, media_type, category, isbn, publisher, is_available, copies)
-    VALUES ( '`+ item.author +`', '`+ item.title +`', '`+ item.media_type +`', '`+ item.catgory +`', `+ item.isbn +`, '`+ item.publisher +`', `+ item.is_available +`, `+ item.copies +`);`, (err, result) => {
-        if (err) throw err;
-        res.redirect('product')
-    })
+    try {
+        connection.query(`INSERT INTO item (author, title, isbn, category, publisher, year, copies)
+            VALUES ( "`+ item.author +`", "`+ item.title +`", "`+ item.isbn +`", "`+ item.category +`", "`+ item.publisher +`", `+ item.year +`, `+ item.copies +`);`, (err, result) => {
+            if (err) throw err;
+        })
+        console.log('Item added successfully: ', req.body)
+        res.status(201).send('Item added successfully');
+    } catch (error) {
+        console.error('Error adding item: ', error);
+        res.status(500).send('Error adding item');
+    }
 })
 
 app.patch('/updateItem', (req, res) => {

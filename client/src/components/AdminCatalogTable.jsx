@@ -53,6 +53,7 @@ const AdminCatalogTable = () => {
 							<TableHeaderCell>Id</TableHeaderCell>
 							<TableHeaderCell>Author</TableHeaderCell>
 							<TableHeaderCell>Title</TableHeaderCell>
+							<TableHeaderCell>ISBN</TableHeaderCell>
 							<TableHeaderCell>Category</TableHeaderCell>
 							<TableHeaderCell>Publisher</TableHeaderCell>
 							<TableHeaderCell>Year of Publication</TableHeaderCell>
@@ -64,13 +65,13 @@ const AdminCatalogTable = () => {
 					<TableBody>
 						{isLoading ? (
 							<TableRow>
-								<TableCell colSpan={8} textAlign='center'>
+								<TableCell colSpan={9} textAlign='center'>
 									Loading...
 								</TableCell>
 							</TableRow>
 						) : error ? (
 							<TableRow>
-								<TableCell colSpan={8} textAlign='center'>
+								<TableCell colSpan={9} textAlign='center'>
 									{error}
 								</TableCell>
 							</TableRow>
@@ -80,6 +81,7 @@ const AdminCatalogTable = () => {
 									<TableCell>{item.id}</TableCell>
 									<TableCell>{item.author}</TableCell>
 									<TableCell>{item.title}</TableCell>
+									<TableCell>{item.isbn}</TableCell>
 									<TableCell>{item.category}</TableCell>
 									<TableCell>{item.publisher}</TableCell>
 									<TableCell>{item.year}</TableCell>
