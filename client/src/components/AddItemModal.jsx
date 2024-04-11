@@ -65,6 +65,14 @@ function AddItemModal() {
     const handleSelectChange = (e, { value }) => {
         setFormData((prevFormData) => ({ ...prevFormData, category: value }))
     }
+    //Handles value change for counter
+    const handleCounterChange = (e) => {
+        const { name, value } = e.target
+        setFormData({
+            ...formData,
+            [name]: value === '' ? 1 : parseInt(value),
+        })
+    }
     // Handles value change for all other inputs
     const handleChange = (e) => {
         setFormData({ 
@@ -135,7 +143,7 @@ function AddItemModal() {
                                     </label>
                                     <FormGroup>
                                         <FormButton icon='minus' onClick={handleDecrement}/>
-                                        <FormInput name='copies' width={2} value={formData.copies}/>
+                                        <FormInput name='copies' width={2} value={formData.copies} onChange={handleCounterChange}/>
                                         <FormButton icon='plus' onClick={handleIncrement}/>
                                     </FormGroup>
                                     <FormGroup>

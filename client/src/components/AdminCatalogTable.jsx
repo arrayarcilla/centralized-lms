@@ -1,9 +1,13 @@
 //--- IMPORTANT IMPORTS
 import React, { useState, useEffect } from 'react';
 
+//--- COMPONENT IMPORTS
+import BookInfoModal from './BookInfoModal'
+
 //--- OTHER IMPORTS
 import {
-    Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow
+    Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
+	Button
 } from 'semantic-ui-react';
 
 const AdminCatalogTable = () => {
@@ -35,6 +39,7 @@ const AdminCatalogTable = () => {
                 const data = await fetchItems(page);
                 setItems(data);
                 setIsLoading(false);
+				
             } catch (error) {
                 setError(error.message);
                 setIsLoading(false);
@@ -43,10 +48,19 @@ const AdminCatalogTable = () => {
         
         fetchData();
     }, []);
+	
+	// console.log(items)
+
+	const categoryMap = {
+		fiction: 'Fiction',
+		non_fiction: 'Non-fiction',
+		reference: 'Reference',
+		others: 'Others',
+	};
 
     return (
 			<>
-				<Table singleLine>
+				<Table>
 
 					<TableHeader>
 						<TableRow>
@@ -56,22 +70,22 @@ const AdminCatalogTable = () => {
 							<TableHeaderCell>ISBN</TableHeaderCell>
 							<TableHeaderCell>Category</TableHeaderCell>
 							<TableHeaderCell>Publisher</TableHeaderCell>
-							<TableHeaderCell>Year of Publication</TableHeaderCell>
 							<TableHeaderCell>Available?</TableHeaderCell>
 							<TableHeaderCell>No. of Copies</TableHeaderCell>
+							<TableHeaderCell>Actions</TableHeaderCell>
 						</TableRow>
 					</TableHeader>
 
 					<TableBody>
 						{isLoading ? (
 							<TableRow>
-								<TableCell colSpan={9} textAlign='center'>
+								<TableCell colSpan={8} textAlign='center'>
 									Loading...
 								</TableCell>
 							</TableRow>
 						) : error ? (
 							<TableRow>
-								<TableCell colSpan={9} textAlign='center'>
+								<TableCell colSpan={8} textAlign='center'>
 									{error}
 								</TableCell>
 							</TableRow>
@@ -82,17 +96,28 @@ const AdminCatalogTable = () => {
 									<TableCell>{item.author}</TableCell>
 									<TableCell>{item.title}</TableCell>
 									<TableCell>{item.isbn}</TableCell>
-									<TableCell>{item.category}</TableCell>
+									<TableCell>{categoryMap[item.category] || item.category}</TableCell>
 									<TableCell>{item.publisher}</TableCell>
-									<TableCell>{item.year}</TableCell>
-									<TableCell>{item.is_available ? 'YES' : 'NO'}</TableCell>
+									<TableCell>{item.is_available ? 'NO' : 'YES'}</TableCell>
 									<TableCell>{item.copies}</TableCell>
+									<TableCell> 
+										<BookInfoModal 
+											id={item.id}
+											author={item.author}
+											title={item.title}
+											category={item.category}
+											isbn={item.isbn}
+											publisher={item.publisher}
+											year={item.year}
+											copies={item.copies}
+										/>
+									</TableCell>
+									
 								</TableRow>
 							))
 						)}
 					</TableBody>
-
-				</Table>	
+				</Table>
 			</>
     );
 }

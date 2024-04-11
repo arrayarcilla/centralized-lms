@@ -4,70 +4,79 @@ import React, { useState } from 'react';
 //--- OTHER IMPORTS
 import {
     Modal, ModalHeader, ModalDescription, ModalContent, ModalActions, 
-    Table, TableBody, TableCell, TableRow,
+    Grid, GridRow, GridColumn,
+    Table, TableHeader, TableHeaderCell, TableBody, TableCell, TableRow,
+    Divider,
     Button,
     Header,
-    Image
+    Image,
 } from 'semantic-ui-react';
 
-function BookInfoModal() {
+function BookInfoModal({id, author, title, category, isbn, publisher, year, copies}) {
     const [open, setOpen] = useState(false);
+
+    const headerWidth = 2; //width for table header column
+    const contentWidth = 14; //width for table content column
+
+    const categoryMap = {
+		fiction: 'Fiction',
+		non_fiction: 'Non-fiction',
+		reference: 'Reference',
+		others: 'Others',
+	};
 
     return (
         <Modal
             onClose={() => setOpen(false)}
             onOpen={() => setOpen(true)}
             open={open}
-            trigger={<Button>Show Modal</Button>} //change the trigger to be the title of the book or the 'eye' icon
+            trigger={<Button size='tiny' icon='eye'/>} //change the trigger to be the title of the book or the 'eye' icon
         >
             <ModalHeader>
                 Book Title Goes Here
             </ModalHeader>
             <ModalContent image>
                 <Image size='medium' src='https://react.semantic-ui.com/images/avatar/large/rachel.png' wrapped />
-                <ModalDescription>
-                    <Header>Title</Header>
-                    <p>This book is about lorem ipsum dolor sit amet</p>
-                    <p>The quick brown fox jumps over the lazy dog</p>
-
+                <ModalDescription style={{width: '100%'}}>
+                <Header content='Title' />
+                    <p>Book description goes here lmao</p>
                     <Table definition>
                         <TableBody>
                             <TableRow>
-                                <TableCell>Id</TableCell>
-                                <TableCell>103</TableCell>
+                                <TableCell width={headerWidth}>Id</TableCell>
+                                <TableCell>{id}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>Title</TableCell>
-                                <TableCell>20,000 Leagues Under the Sea</TableCell>
+                                <TableCell width={headerWidth}>Title</TableCell>
+                                <TableCell>{title}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>Author</TableCell>
-                                <TableCell>Verne, Jules</TableCell>
+                                <TableCell width={headerWidth}>Author</TableCell>
+                                <TableCell>{author}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>Category</TableCell>
-                                <TableCell>Fiction</TableCell>
+                                <TableCell width={headerWidth}>Category</TableCell>
+                                <TableCell>{categoryMap[category] || category}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>ISBN</TableCell>
-                                <TableCell>1603400370</TableCell>
+                                <TableCell width={headerWidth}>ISBN</TableCell>
+                                <TableCell>{isbn}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>Publisher</TableCell>
-                                <TableCell>Waldman Publishing Corp.</TableCell>
+                                <TableCell width={headerWidth}>Publisher</TableCell>
+                                <TableCell>{publisher}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>Year</TableCell>
-                                <TableCell>2008</TableCell>
+                                <TableCell width={headerWidth}>Year</TableCell>
+                                <TableCell>{year}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell>Copies</TableCell>
-                                <TableCell>3</TableCell>
+                                <TableCell width={headerWidth}>Copies</TableCell>
+                                <TableCell>{copies}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
-
-                </ModalDescription>
+                </ModalDescription>             
             </ModalContent>
             <ModalActions>
                 <Button color='black' onClick={() => setOpen(false)} content='Nope' />
