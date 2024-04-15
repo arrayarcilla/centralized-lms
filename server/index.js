@@ -67,7 +67,7 @@ app.post('/create_user', (req, res) => {
 
 app.delete('/deleteItem', (req, res) => {
     connection.query(`UPDATE item
-                        SET is_available = 0
+                        SET available = 0
                         WHERE id = `+ req.body.id +`;`, (err, result) => {
         res.render("product", { products: result });
     });
@@ -76,8 +76,8 @@ app.delete('/deleteItem', (req, res) => {
 app.post('/addItem', (req, res) => {
     const item = req.body
     try {
-        connection.query(`INSERT INTO item (author, title, isbn, category, publisher, year, copies)
-            VALUES ( "`+ item.author +`", "`+ item.title +`", "`+ item.isbn +`", "`+ item.category +`", "`+ item.publisher +`", `+ item.year +`, `+ item.copies +`);`, (err, result) => {
+        connection.query(`INSERT INTO item (author, title, isbn, category, publisher, year, available, copies)
+            VALUES ( "`+ item.author +`", "`+ item.title +`", "`+ item.isbn +`", "`+ item.category +`", "`+ item.publisher +`", `+ item.year +`, `+ item.copies +`, `+ item.copies +`);`, (err, result) => {
             if (err) throw err;
         })
         console.log('Item added successfully: ', req.body)
@@ -142,21 +142,38 @@ app.get('/items', async (req, res) => {
 
   // Route to handle search
 app.get('/search', (req, res) => {
-    const searchQuery = req.query.search; // Assuming the search term is provided as 'q' query parameter
-    const sqlQuery = `
-      SELECT *
-      FROM item
-      WHERE title LIKE '%${searchQuery}%' OR author LIKE '%${searchQuery}%' OR publisher LIKE '%${searchQuery}%'
-    `;
-    connection.query(sqlQuery, (err, results) => {
-      if (err) {
-        console.error('Error executing MySQL query: ' + err.stack);
+    try {
+        // console.log(req.query)
+        const searchQuery = req.query.search;
+        const category = req.query.category
+        const page = parseInt(req.query.page) || 1;
+        const itemsPerPage = 10;
+        const offset = (page - 1) * itemsPerPage;
+
+        if (isNaN(page) || page < 1) {
+            throw new Error('Invalid page number');
+        }
+
+        const sqlQuery = `
+        SELECT *
+        FROM item
+        WHERE title LIKE '%${searchQuery}%' OR author LIKE '%${searchQuery}%' OR publisher LIKE '%${searchQuery}%'
+        AND category = '%${category}%' OR category is NULL
+        LIMIT ${itemsPerPage} OFFSET ${offset}
+        `;
+        connection.query(sqlQuery, (err, results) => {
+        if (err) {
+            console.error('Error executing MySQL query: ' + err.stack);
+            res.status(500).json({ error: 'Internal server error' });
+            return;
+        }
+        res.json(results);
+        });
+    } catch (error) {
+        console.error('Error retrieving items: ', error)
         res.status(500).json({ error: 'Internal server error' });
-        return;
-      }
-      res.json(results);
-    });
-  });
+    }
+});
   
 
 app.post('/getItem', (req, res) => {
@@ -167,54 +184,114 @@ app.post('/getItem', (req, res) => {
 
 //------------------------------------------------MEMBER----------------------------------------------------
 
-// Borrow an item
 app.post('/borrowItem', (req, res) => {
-    const { user_id } = req.body;
+    const userId = req.session.id
+    const { bookId } = req.body
 
-    // Check if the item is available and has copies
-    connection.query('SELECT * FROM item WHERE id = ? AND is_available = 1 AND copies > 0', [sesh.id], (err, result) => {
-        if (err) {
-            console.error('Error executing MySQL query: ' + err.stack);
-            res.status(500).json({ error: 'Internal server error' });
-            return;
-        }
+    // Input validation optional
+    // if (!userId || !bookId) {
+    //     return res.status(400).send({ error: 'Missing required data' });
+    // }
 
-        if (result.length > 0) {
-            // Item is available and has copies, proceed with borrowing
-            const issue_date = new Date().toISOString().slice(0, 10); // Get current date
+    // Check book availability
+    connection.query(
+        'SELECT available FROM item WHERE id = ?', [bookId], (err, results) => {
+            if (err) {
+                console.errot(err)
+                return res.status(500).send({ error: 'An error has occured' })
+            }
 
-            // Insert transaction record
-            connection.query('INSERT INTO transaction (user_id, item_id, issue_date) VALUES (?, ?, ?)',
-                [sesh.id, item_id, issue_date],
+            if (results.length === 0) {
+                return res.status(404).send({ error: 'Book not found' })
+            }
+
+            const { available } = results[0]
+
+            if (available <= 0) {
+                return res.status(400).send({ error: 'Book is not currently available' })
+            }
+
+            // Create transaction record
+            const issueDate = new Date()
+            const dueDate = new Date(issueDate.getTime() + 7 * 24 * 60 * 60 * 1000); // Add 7 days
+
+            connection.query(
+                'INSERT INTO transaction (user_id, item_id, issue_date, due_date) VALUES (?, ?, ?, ?)', [userId, bookId, issueDate, dueDate],
                 (err, result) => {
                     if (err) {
-                        console.error('Error executing MySQL query: ' + err.stack);
-                        res.status(500).json({ error: 'Internal server error' });
-                        return;
+                        console.error(err);
+                        return res.status(500).send({ error: 'An error occured' })
                     }
 
-                    // Decrement number of copies and update item availability if copies reach 0
-                    connection.query(`
-                        UPDATE item 
-                        SET 
-                            copies = copies - 1,
-                            is_available = CASE WHEN copies - 1 <= 0 THEN 0 ELSE is_available END 
-                        WHERE id = ?`, 
-                    [item_id], (err, result) => {
-                        if (err) {
-                            console.error('Error executing MySQL query: ' + err.stack);
-                            res.status(500).json({ error: 'Internal server error' });
-                            return;
+                    // Decrement available copies
+                    connection.query(
+                        'UPDATE item SET available = available - 1 WHERE id = ?', [bookId],
+                        (err, updateResult) => {
+                            if (err) {
+                                console.error(err);
+                                // Consider handling potential rollbacl or further error handling here
+                            }
                         }
+                    )
 
-                        res.status(200).send('Item borrowed successfully');
-                    });
-                });
-        } else {
-            res.status(400).send('Item is not available for borrowing or has no copies');
+                    res.json({ message: 'Book borrowed successfully!' })
+                }
+
+            )
         }
-    });
-});
+    )
+})
+
+
+// Borrow an item
+// app.post('/borrowItem', (req, res) => {
+//     const { user_id } = req.body;
+
+//     // Check if the item is available and has copies
+//     connection.query('SELECT * FROM item WHERE id = ? AND is_available = 1 AND copies > 0', [sesh.id], (err, result) => {
+//         if (err) {
+//             console.error('Error executing MySQL query: ' + err.stack);
+//             res.status(500).json({ error: 'Internal server error' });
+//             return;
+//         }
+
+//         if (result.length > 0) {
+//             // Item is available and has copies, proceed with borrowing
+//             const issue_date = new Date().toISOString().slice(0, 10); // Get current date
+
+//             // Insert transaction record
+//             connection.query('INSERT INTO transaction (user_id, item_id, issue_date) VALUES (?, ?, ?)',
+//                 [sesh.id, item_id, issue_date],
+//                 (err, result) => {
+//                     if (err) {
+//                         console.error('Error executing MySQL query: ' + err.stack);
+//                         res.status(500).json({ error: 'Internal server error' });
+//                         return;
+//                     }
+
+//                     // Decrement number of copies and update item availability if copies reach 0
+//                     connection.query(`
+//                         UPDATE item 
+//                         SET 
+//                             copies = copies - 1,
+//                             is_available = CASE WHEN copies - 1 <= 0 THEN 0 ELSE is_available END 
+//                         WHERE id = ?`, 
+//                     [item_id], (err, result) => {
+//                         if (err) {
+//                             console.error('Error executing MySQL query: ' + err.stack);
+//                             res.status(500).json({ error: 'Internal server error' });
+//                             return;
+//                         }
+
+//                         res.status(200).send('Item borrowed successfully');
+//                     });
+//                 });
+//         } else {
+//             res.status(400).send('Item is not available for borrowing or has no copies');
+//         }
+//     });
+// });
+
 
 // Return an item
 app.post('/returnItem', (req, res) => {

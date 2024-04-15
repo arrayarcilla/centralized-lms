@@ -120,7 +120,7 @@ function AddItemModal() {
                                     <FormInput name='author' label='Author' width={5} onChange={handleChange} />
                                     <FormSelect 
                                         name='category'
-                                        label='Catgory'
+                                        label='Category'
                                         options={categoryOptions}
                                         placeholder='Fiction'
                                         width={3}

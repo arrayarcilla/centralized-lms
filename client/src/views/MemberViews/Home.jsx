@@ -5,16 +5,25 @@ import React from 'react';
 import MenuBar from '../../components/Menubar'
 
 //--- Other Imports
-import { GridRow, GridColumn, Grid, Segment, Container, List, ListItem, HeaderContent, Header, FormInput, FormSelect, Form, Icon, Image, Button } from 'semantic-ui-react';
+import { 
+	GridRow, GridColumn, Grid, 
+	Segment, 
+	Container, 
+	List, ListItem, 
+	HeaderContent, Header, 
+	FormInput, FormButton, FormSelect, Form, 
+	Icon, 
+	Image, 
+	Button 
+} from 'semantic-ui-react';
 
 function  Home() {
 	const searchOptions = [
-		{ text: 'Books', value: 'books' },
-		{ text: 'Audio/Visuals', value: 'audio-visuals' },
-		{ text: 'Ebooks', value: 'ebooks' },
-		{ text: 'Journals/Thesis', value: 'journals-thesis' },
-		{ text: 'Encyclopedias', value: 'encyclopedias' },
-		{ text: 'News Clippings', value: 'newsclippings' },
+		{ key: 'all', text: 'All', value: 'all' },
+		{ key: 'all', text: 'Fiction', value: 'fiction' },
+		{ key: 'all', text: 'Non-fiction', value: 'non_fiction' },
+		{ key: 'all', text: 'Reference', value: 'reference' },
+		{ key: 'all', text: 'Others', value: 'others' },
 	];
 
 	return (
@@ -49,7 +58,8 @@ function  Home() {
 								<br />
 								<Form>
 									<FormInput label='Keyword' />
-									<FormSelect label='Media Type' options={ searchOptions } fluid/>
+									<FormSelect label='Category' placeholder='All' options={ searchOptions } fluid/>
+									<FormButton type='submit' content='Search' />
 								</Form>
 							</Container>
 						</Segment>
