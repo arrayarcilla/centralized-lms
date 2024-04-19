@@ -184,116 +184,110 @@ app.post('/getItem', (req, res) => {
 
 //------------------------------------------------MEMBER----------------------------------------------------
 
-app.post('/borrowItem', (req, res) => {
-    const userId = req.session.id
+app.post('/borrow', async (req, res) => {
     const { bookId } = req.body
+    const userId = req.session.userId
 
-    // Input validation optional
-    // if (!userId || !bookId) {
-    //     return res.status(400).send({ error: 'Missing required data' });
-    // }
-
-    // Check book availability
-    connection.query(
-        'SELECT available FROM item WHERE id = ?', [bookId], (err, results) => {
-            if (err) {
-                console.errot(err)
-                return res.status(500).send({ error: 'An error has occured' })
-            }
-
-            if (results.length === 0) {
-                return res.status(404).send({ error: 'Book not found' })
-            }
-
-            const { available } = results[0]
-
-            if (available <= 0) {
-                return res.status(400).send({ error: 'Book is not currently available' })
-            }
-
-            // Create transaction record
-            const issueDate = new Date()
-            const dueDate = new Date(issueDate.getTime() + 7 * 24 * 60 * 60 * 1000); // Add 7 days
-
-            connection.query(
-                'INSERT INTO transaction (user_id, item_id, issue_date, due_date) VALUES (?, ?, ?, ?)', [userId, bookId, issueDate, dueDate],
-                (err, result) => {
-                    if (err) {
-                        console.error(err);
-                        return res.status(500).send({ error: 'An error occured' })
-                    }
-
-                    // Decrement available copies
-                    connection.query(
-                        'UPDATE item SET available = available - 1 WHERE id = ?', [bookId],
-                        (err, updateResult) => {
-                            if (err) {
-                                console.error(err);
-                                // Consider handling potential rollbacl or further error handling here
-                            }
-                        }
-                    )
-
-                    res.json({ message: 'Book borrowed successfully!' })
-                }
-
-            )
+    // Checking for availability
+    try {
+        const [rows] = await connection.query('SELECT available FROM item WHERE id = ?', [bookId])
+        if (!rows.length || rows[0].available <= 0) {
+            return res.status(400).json({ message: 'Book unavailable.' })
         }
-    )
+    } catch (err) {
+        console.error(err)
+        return res.status(500).json({ message: 'Internal server error.' })
+    }
+
+    // Start a transaction
+    const connection = await pool.getConnection()
+    await connection.beginTransaction()
+
+    try {
+        // Decrement available count for the borrowed book
+        await connection.query('UPDATE item SET available = available - 1 WHERE id = ?', [bookId])
+
+        // Set value of due date to be 7 days after current date
+        const issueDate = new Date().toISOString().slice(0, 10); // Get current date (YYYY-MM-DD)
+        const dueDate = new Date(issueDate);
+        dueDate.setDate(dueDate.getDate() + 7);
+
+        // Create transaction entry
+        await connection.query('INSERT INTO transaction (user_id, item_id, due_date) VALUES (?, ?, ?)', [userId, bookId, dueDate])
+
+        await connection.commit()
+        res.status(201).json({ message: 'Borrowed successfuly!' })
+    } catch (err) {
+        await connection.rollback()
+        console.error(err)
+        res.status(500).json({ message: 'Internal server error' })
+    } finally {
+        connection.release()
+    }
 })
 
 
-// Borrow an item
+
 // app.post('/borrowItem', (req, res) => {
-//     const { user_id } = req.body;
+//     const userId = req.session.id
+//     const { bookId } = req.body
 
-//     // Check if the item is available and has copies
-//     connection.query('SELECT * FROM item WHERE id = ? AND is_available = 1 AND copies > 0', [sesh.id], (err, result) => {
-//         if (err) {
-//             console.error('Error executing MySQL query: ' + err.stack);
-//             res.status(500).json({ error: 'Internal server error' });
-//             return;
-//         }
+//     // Input validation optional
+//     // if (!userId || !bookId) {
+//     //     return res.status(400).send({ error: 'Missing required data' });
+//     // }
 
-//         if (result.length > 0) {
-//             // Item is available and has copies, proceed with borrowing
-//             const issue_date = new Date().toISOString().slice(0, 10); // Get current date
+//     // Check book availability
+//     connection.query(
+//         'SELECT available FROM item WHERE id = ?', [bookId], (err, results) => {
+//             if (err) {
+//                 console.errot(err)
+//                 return res.status(500).send({ error: 'An error has occured' })
+//             }
 
-//             // Insert transaction record
-//             connection.query('INSERT INTO transaction (user_id, item_id, issue_date) VALUES (?, ?, ?)',
-//                 [sesh.id, item_id, issue_date],
+//             if (results.length === 0) {
+//                 return res.status(404).send({ error: 'Book not found' })
+//             }
+
+//             const { available } = results[0]
+
+//             if (available <= 0) {
+//                 return res.status(400).send({ error: 'Book is not currently available' })
+//             }
+
+//             // Create transaction record
+//             const issueDate = new Date()
+//             const dueDate = new Date(issueDate.getTime() + 7 * 24 * 60 * 60 * 1000); // Add 7 days
+
+//             connection.query(
+//                 'INSERT INTO transaction (user_id, item_id, issue_date, due_date) VALUES (?, ?, ?, ?)', [userId, bookId, issueDate, dueDate],
 //                 (err, result) => {
 //                     if (err) {
-//                         console.error('Error executing MySQL query: ' + err.stack);
-//                         res.status(500).json({ error: 'Internal server error' });
-//                         return;
+//                         console.error(err);
+//                         return res.status(500).send({ error: 'An error occured' })
 //                     }
 
-//                     // Decrement number of copies and update item availability if copies reach 0
-//                     connection.query(`
-//                         UPDATE item 
-//                         SET 
-//                             copies = copies - 1,
-//                             is_available = CASE WHEN copies - 1 <= 0 THEN 0 ELSE is_available END 
-//                         WHERE id = ?`, 
-//                     [item_id], (err, result) => {
-//                         if (err) {
-//                             console.error('Error executing MySQL query: ' + err.stack);
-//                             res.status(500).json({ error: 'Internal server error' });
-//                             return;
+//                     // Decrement available copies
+//                     connection.query(
+//                         'UPDATE item SET available = available - 1 WHERE id = ?', [bookId],
+//                         (err, updateResult) => {
+//                             if (err) {
+//                                 console.error(err);
+//                                 // Consider handling potential rollbacl or further error handling here
+//                             }
 //                         }
+//                     )
 
-//                         res.status(200).send('Item borrowed successfully');
-//                     });
-//                 });
-//         } else {
-//             res.status(400).send('Item is not available for borrowing or has no copies');
+//                     res.json({ message: 'Book borrowed successfully!' })
+//                 }
+
+//             )
 //         }
-//     });
-// });
-
+//     )
+// })
 
 // Return an item
+
 app.post('/returnItem', (req, res) => {
     const { transaction_id, item_id } = req.body;
 
