@@ -30,10 +30,13 @@ const LoginForm = () => {
             });
             if (response.ok) {
                 const data = await response.json();
+                const userId = data.id // Get the user id
+
+                localStorage.setItem('userId', userId) // Store userId using local storage
                 console.log('Response data:', data); // Log the entire response data
+
+                const user_id = localStorage.getItem('userId')
                 if (data.usertype) {
-                    console.log('Type of usertype:', typeof data.usertype);
-                    console.log('User type:', data.usertype);
                     if (data.usertype.toLowerCase() === "admin") {
                         console.log("this is the admin");
                         navigate('/dashboard');

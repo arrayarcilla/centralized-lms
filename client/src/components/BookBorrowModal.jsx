@@ -18,6 +18,8 @@ function BookBorrowModal({open, handleCloseModal, book}) {
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [successOpen, setSuccessOpen] = useState(false)
 
+    const userId = localStorage.getItem('userId')
+
     const headerWidth = 4; //width for table header column
 
     const handleSubmit = async () => {
@@ -25,7 +27,7 @@ function BookBorrowModal({open, handleCloseModal, book}) {
           const response = await fetch('http://localhost:3000/borrowBook', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bookId: book.id }), // Send book ID
+            body: JSON.stringify({ bookId: book.id, userId: userId }), // Send book ID
           });
     
           if (!response.ok) {

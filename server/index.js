@@ -38,9 +38,9 @@ app.post('/', (req, res) => {
             sesh.usertype = result[0].userType; // Accessing userType property
 
             if (result[0].userType === "admin") {
-                res.json({ usertype: "admin" });
+                res.json({ id: result[0].id, usertype: "admin" });
             } else {
-                res.json({ usertype: "member" });
+                res.json({ id: result[0].id, usertype: "member" });
             }
         } else {
             res.send({ })
@@ -185,10 +185,10 @@ app.post('/getItem', (req, res) => {
 //------------------------------------------------MEMBER----------------------------------------------------
 
 app.post('/borrowBook', (req, res) => {
-    const userId = req.session.id
-    const { bookId } = req.body
+    const userId = req.body.userId
+    const bookId  = req.body.bookId
 
-    console.log('user id: ', req.session.id) // output is 'Cag0Lv4KeeZMeDo9ZabkKrY-SHkDedGZ' for some reason
+    console.log('user id: ', req.body.userId) // output is 'Cag0Lv4KeeZMeDo9ZabkKrY-SHkDedGZ' for some reason
 
     // Check book availability
     connection.query(
