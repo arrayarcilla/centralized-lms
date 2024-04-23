@@ -20,10 +20,10 @@ import {
 function  Home() {
 	const searchOptions = [
 		{ key: 'all', text: 'All', value: 'all' },
-		{ key: 'all', text: 'Fiction', value: 'fiction' },
-		{ key: 'all', text: 'Non-fiction', value: 'non_fiction' },
-		{ key: 'all', text: 'Reference', value: 'reference' },
-		{ key: 'all', text: 'Others', value: 'others' },
+		{ key: 'fiction', text: 'Fiction', value: 'fiction' },
+		{ key: 'non_fiction', text: 'Non-fiction', value: 'non_fiction' },
+		{ key: 'reference', text: 'Reference', value: 'reference' },
+		{ key: 'others', text: 'Others', value: 'others' },
 	];
 
 	return (

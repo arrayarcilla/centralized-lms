@@ -15,7 +15,31 @@ import {
 
 function BookBorrowModal({open, handleCloseModal, book}) {
 
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [successOpen, setSuccessOpen] = useState(false)
+
     const headerWidth = 4; //width for table header column
+
+    const handleSubmit = async () => {
+        try {
+          const response = await fetch('http://localhost:3000/borrowBook', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookId: book.id }), // Send book ID
+          });
+    
+          if (!response.ok) {
+            throw new Error('Failed to borrow book');
+          }
+    
+          const data = await response.json();
+          console.log('Borrow successful:', data); // Log success message
+
+        } catch (err) {
+          console.error('Error borrowing book:', err);
+          // Handle errors appropriately
+        }
+    };
 
     const categoryMap = {
 		fiction: 'Fiction',
@@ -34,12 +58,12 @@ function BookBorrowModal({open, handleCloseModal, book}) {
                 <GridColumn textAlign='right' width={1}><Button size='tiny' icon='close' basic negative onClick={handleCloseModal}/></GridColumn>
             </Grid></ModalHeader>
             <ModalContent image>
-                <Grid>
+                <Grid container>
                     <GridRow columns={2} stretched >
                         <GridColumn width={6}>
                             <GridRow>
-                                <Image size='medium' src='https://react.semantic-ui.com/images/avatar/large/rachel.png' wrapped />
-                            </GridRow>
+                                <Image src='https://react.semantic-ui.com/images/avatar/large/rachel.png' wrapped />
+                            </GridRow><br />
                             <GridRow>
                                 <Grid textAlign='center'>
                                     <GridRow>
@@ -51,10 +75,10 @@ function BookBorrowModal({open, handleCloseModal, book}) {
                                         )}
                                     </GridRow>
                                 </Grid>
-                            </GridRow>
+                            </GridRow><br />
                             <GridRow>
                                 <Label size='big' color='blue' basic image>{book.available}<LabelDetail content='Available Copies'/></Label>
-                            </GridRow>
+                            </GridRow><br />
                             <GridRow>
                                 <Label size='big' color='black' basic image>{book.copies}<LabelDetail content='Total Copies'/></Label>
                             </GridRow>
@@ -98,7 +122,31 @@ function BookBorrowModal({open, handleCloseModal, book}) {
             </ModalContent>
             <ModalActions>
                 {/* make the handle submit and other stuff */}
-                <Button content='Borrow' type='submit' positive onClick={handleCloseModal}/> 
+                <Modal
+                    onClose={() => setConfirmOpen(false)}
+                    onOpen={() => setConfirmOpen(true)}
+                    open={confirmOpen}
+                    trigger={<Button content='Borrow' type='submit' positive/>}
+                >
+                    <ModalHeader content='Are you sure you want to borrow this book?' />
+                    <ModalContent>You are borrowing a copy of <b>{book.title}</b> by <b>{book.author}</b>.</ModalContent>
+                    <ModalActions>
+                        <Modal
+                            onClose={() => setSuccessOpen(false)}
+                            onOpen={() => setSuccessOpen(true)}
+                            open={successOpen}
+                            trigger={<Button type='submit' content='Yes' primary onClick={handleSubmit}/>}
+                        >
+                            <ModalHeader content='Success!' />
+                            <ModalContent content='Book has been successfully borrowed.' />
+                            <ModalActions>
+                                <Button content='OK' positive onClick={() => {setSuccessOpen(false); setConfirmOpen(false); handleCloseModal(); window.location.reload()}} />
+                            </ModalActions>
+                        </Modal>
+                        <Button content='No' negative onClick={() => setConfirmOpen(false)} />
+                    </ModalActions>
+                </Modal>
+                
                 <Button content='Reserve' type='submit' primary onClick={handleCloseModal}/>
             </ModalActions>
         </Modal>

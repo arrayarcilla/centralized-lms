@@ -169,7 +169,7 @@ function SearchCatalog() {
                                         <TableCell>{item.author}</TableCell>
                                         <TableCell>{item.publisher}</TableCell>
                                         <TableCell>{categoryMap[item.category] || item.category}</TableCell>
-                                        <TableCell>{item.copies}</TableCell>
+                                        <TableCell>{item.available}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
