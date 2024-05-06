@@ -24,27 +24,11 @@ function MenuBar() {
                     onClick={handleItemClick}
                 />
                 <MenuItem
-                    content='Catalog'
-                    as={Link} to='/member_catalog'
-                    link
-                    name='member_catalog'
-                    active={activeItem === 'member_catalog'}
-                    onClick={handleItemClick}
-                />
-                <MenuItem
                     content='Search Catalog'
                     as={Link} to='/search'
                     link
                     name='search'
                     active={activeItem === 'search'}
-                    onClick={handleItemClick}
-                />
-                <MenuItem
-                    content='Database A-Z'
-                    as={Link} to='/database'
-                    link
-                    name='database'
-                    active={activeItem === 'database'}
                     onClick={handleItemClick}
                 />
                 <MenuItem

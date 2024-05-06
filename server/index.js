@@ -182,6 +182,30 @@ app.post('/getItem', (req, res) => {
     });
 });
 
+app.post('/getActiveTransactions', (req, res) => {
+    const userId = req.body.userId
+
+    if (!userId) {
+        return res.status(401).send('Unauthorized')
+    }
+
+    const query = `
+        SELECT i.*, t.id, t.item_id, t.issue_date, t.due_date
+        FROM item i
+        INNER JOIN transaction t ON i.id = t.item_id
+        WHERE t.user_id = ? AND t.return_date IS NULL
+    `;
+
+    connection.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error fetching active transactions')
+        }
+
+        res.send(results)
+    })
+})
+
 //------------------------------------------------MEMBER----------------------------------------------------
 
 app.post('/borrowBook', (req, res) => {
@@ -194,7 +218,7 @@ app.post('/borrowBook', (req, res) => {
     connection.query(
         'SELECT available FROM item WHERE id = ?', [bookId], (err, results) => {
             if (err) {
-                console.errot(err)
+                console.error(err)
                 return res.status(500).send({ error: 'An error has occured' })
             }
 
@@ -240,36 +264,63 @@ app.post('/borrowBook', (req, res) => {
 
 // Return an item
 
-app.post('/returnItem', (req, res) => {
-    const { transaction_id, item_id } = req.body;
+// app.post('/returnBook', async (req, res) => {
+//     try {
+//         const { transactionId } = req.body; // get transaction Id from request
 
-    // Update return date in the transaction record
-    connection.query('UPDATE transaction SET return_date = ? WHERE id = ?',
-        [new Date().toISOString().slice(0, 10), transaction_id],
-        (err, result) => {
+//         // Update transaction with return date
+//         connection.query(
+//             'UPDATE transaction SET return_date = CURRENT_DATE WHERE id = ?',
+//             [transactionId]
+//         )
+
+//         // Get item details for the transaction
+//         const transactionDetails = connection.query(
+//             'SELECT item_id FROM transaction WHERE id = ?',
+//             [transactionId]
+//         )
+
+//         const itemId = transactionDetails[0].item_id
+
+//         //Updat e available count for the item
+//         connection.query(
+//             'UPDATE item SET available = available + 1 WHERE id = ?',
+//             [itemId]
+//         )
+
+//         res.json({ message: 'Book returned successfully!' })
+//     } catch (error) {
+//         console.error(error)
+//         res.status(500).json({ message: 'Internal server error.' })
+//     }
+// })
+
+app.post('/returnBook', (req, res) => {
+    const transactionId = req.body.transactionId
+    const bookId = req.body.itemId
+
+    try {
+        // Update transaction with return date
+        connection.query(
+          `UPDATE transaction SET return_date = ? WHERE id = ?`, [new Date(), transactionId], (err, results) => {
             if (err) {
-                console.error('Error executing MySQL query: ' + err.stack);
-                res.status(500).json({ error: 'Internal server error' });
-                return;
+                console.error(err)
+                return res.status(500).send({ error: 'An error has occured' })
             }
-
-            // Increment number of copies and update item availability if necessary
-            connection.query(`
-                UPDATE item 
-                SET 
-                    copies = copies + 1,
-                    is_available = CASE WHEN copies = 0 THEN 1 ELSE is_available END 
-                WHERE id = ?`, 
-            [item_id], (err, result) => {
+            // Update item availability
+            connection.query(`UPDATE item SET available = available + 1 WHERE id = ?`, [bookId], (err, result) => {
                 if (err) {
-                    console.error('Error executing MySQL query: ' + err.stack);
-                    res.status(500).json({ error: 'Internal server error' });
-                    return;
+                    console.error(err)
+                    return res.status(500).send({ error: 'An error occured' })
                 }
-
-                res.status(200).send('Item returned successfully');
             });
-        });
+          }
+        );
+        res.status(200).json({ message: 'Item returned successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Get borrowed books for a user

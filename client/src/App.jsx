@@ -18,9 +18,7 @@ import FeesAndPayments from './views/AdminViews/FeesAndPayments';
 
 //-- Member Views
 import Home from './views/MemberViews/Home';
-import MemberCatalog from './views/MemberViews/MemberCatalog';
 import SearchCatalog from './views/MemberViews/SearchCatalog';
-import Database from './views/MemberViews/Database';
 import MyAccount from './views/MemberViews/MyAccount';
 import Contact from './views/MemberViews/Contact';
 
@@ -47,9 +45,7 @@ function App() {
         {/* Member Routes */}
 
         <Route path='/home' element={<Home />} />
-        <Route path='/member_catalog' element={<MemberCatalog />} />
         <Route path='/search' element={<SearchCatalog />} />
-        <Route path='/database' element={<Database />} />
         <Route path='/my_account' element={<MyAccount />} />
         <Route path='/contact' element={<Contact />} />
 
