@@ -182,37 +182,13 @@ app.post('/getItem', (req, res) => {
     });
 });
 
-app.post('/getActiveTransactions', (req, res) => {
-    const userId = req.body.userId
-
-    if (!userId) {
-        return res.status(401).send('Unauthorized')
-    }
-
-    const query = `
-        SELECT i.*, t.id, t.item_id, t.issue_date, t.due_date
-        FROM item i
-        INNER JOIN transaction t ON i.id = t.item_id
-        WHERE t.user_id = ? AND t.return_date IS NULL
-    `;
-
-    connection.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.status(500).send('Error fetching active transactions')
-        }
-
-        res.send(results)
-    })
-})
-
 //------------------------------------------------MEMBER----------------------------------------------------
 
 app.post('/borrowBook', (req, res) => {
     const userId = req.body.userId
     const bookId  = req.body.bookId
 
-    console.log('user id: ', req.body.userId) // output is 'Cag0Lv4KeeZMeDo9ZabkKrY-SHkDedGZ' for some reason
+    console.log('user id: ', req.body.userId)
 
     // Check book availability
     connection.query(
@@ -222,15 +198,11 @@ app.post('/borrowBook', (req, res) => {
                 return res.status(500).send({ error: 'An error has occured' })
             }
 
-            if (results.length === 0) {
-                return res.status(404).send({ error: 'Book not found' })
-            }
+            if (results.length === 0) { return res.status(404).send({ error: 'Book not found' }) }
 
             const { available } = results[0]
 
-            if (available <= 0) {
-                return res.status(400).send({ error: 'Book is not currently available' })
-            }
+            if (available <= 0) { return res.status(400).send({ error: 'Book is not currently available' }) }
 
             // Create transaction record
             const issueDate = new Date()
@@ -262,39 +234,6 @@ app.post('/borrowBook', (req, res) => {
     )
 })
 
-// Return an item
-
-// app.post('/returnBook', async (req, res) => {
-//     try {
-//         const { transactionId } = req.body; // get transaction Id from request
-
-//         // Update transaction with return date
-//         connection.query(
-//             'UPDATE transaction SET return_date = CURRENT_DATE WHERE id = ?',
-//             [transactionId]
-//         )
-
-//         // Get item details for the transaction
-//         const transactionDetails = connection.query(
-//             'SELECT item_id FROM transaction WHERE id = ?',
-//             [transactionId]
-//         )
-
-//         const itemId = transactionDetails[0].item_id
-
-//         //Updat e available count for the item
-//         connection.query(
-//             'UPDATE item SET available = available + 1 WHERE id = ?',
-//             [itemId]
-//         )
-
-//         res.json({ message: 'Book returned successfully!' })
-//     } catch (error) {
-//         console.error(error)
-//         res.status(500).json({ message: 'Internal server error.' })
-//     }
-// })
-
 app.post('/returnBook', (req, res) => {
     const transactionId = req.body.transactionId
     const bookId = req.body.itemId
@@ -323,27 +262,49 @@ app.post('/returnBook', (req, res) => {
     }
 });
 
-// Get borrowed books for a user
-app.get('/borrowedItem', (req, res) => {
-    const userId = req.session.id;
-
-    // Query to get borrowed books for the user
+app.post('/getActiveTransactions', (req, res) => {
+    const userId = req.body.userId
+    if (!userId) {
+        return res.status(401).send('Unauthorized')
+    }
     const query = `
-        SELECT item.*
-        FROM item
-        INNER JOIN transaction ON item.id = transaction.item_id
-        WHERE transaction.user_id = ?;
+        SELECT i.*, t.id, t.item_id, t.issue_date, t.due_date
+        FROM item i
+        INNER JOIN transaction t ON i.id = t.item_id
+        WHERE t.user_id = ? AND t.return_date IS NULL
     `;
 
     connection.query(query, [userId], (err, results) => {
         if (err) {
-            console.error('Error executing MySQL query: ' + err.stack);
-            res.status(500).json({ error: 'Internal server error' });
-            return;
+            console.error(err);
+            return res.status(500).send('Error fetching active transactions')
         }
 
-        res.status(200).json(results);
-    });
+        res.send(results)
+    })
+})
+
+
+app.get('/getBorrowHistory', (req, res) => {
+    const userId = req.query.id;
+    if (!userId) {
+        return res.status(401).send('Unauthorized')
+    }
+    const query = `
+    SELECT i.*, t.id, t.item_id, t.return_date
+    FROM item i
+    INNER JOIN transaction t ON i.id = t.item_id
+    WHERE t.user_id = ? AND t.return_date IS NOT NULL AND t.return_date <> '0000-00-00';
+    `;
+
+    connection.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).send('Error fetching active transactions')
+        }
+
+        res.send(results)
+    })
 });
 
 

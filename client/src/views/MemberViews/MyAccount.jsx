@@ -1,9 +1,10 @@
 //--- Important Imports
-import React from 'react';
+import React, {useState} from 'react';
 
 //--- Component Imports
 import MenuBar from '../../components/Menubar';
 import MemberActiveBooking from '../../components/MemberActiveBooking';
+import MemberBookingHistory from '../../components/MemberBookingHistory'
 
 //--- Other Imports
 import { 
@@ -20,6 +21,11 @@ import {
 } from 'semantic-ui-react';
 
 function MyAccount() {
+    const [activeTab, setActiveTab] = useState('recentBookings')
+    const userId = localStorage.getItem('userId')
+
+    const handleTabClick = (tabName) => { setActiveTab(tabName) }
+
     return (
         <>
             <MenuBar />
@@ -29,8 +35,8 @@ function MyAccount() {
                         <GridRow columns={2} relaxed='very'>
                             <GridColumn width={3}><Header as='h1' content='My Account' /></GridColumn>
                             <GridColumn width={13} textAlign='right'>
-                                <Button content='My Recent Bookings' />
-                                <Button content='Booking History' />
+                                <Button content='My Recent Bookings' active={activeTab === 'recentBookings'} onClick={() => handleTabClick ('recentBookings')}/>
+                                <Button content='Booking History'  active={activeTab === 'bookingHistory'} onClick={() => handleTabClick ('bookingHistory')}/>
                                 <Button content='Account Settings' />
                             </GridColumn>
                         </GridRow>
@@ -38,20 +44,23 @@ function MyAccount() {
                         <GridRow columns={1}>
                             <GridColumn>
                                 <p>The <b>SandL Library</b> member area is specially designed to provide an extremely simplified yet powerful way to manage your library bookings, access histories, favorite items and other activities through out your entire membership life cycle.</p>
-                                <Header as='h2' content='You are Member no. 101' />
+                                <Header as='h2'>You are Member no. {userId}</Header>
                             </GridColumn>
                         </GridRow>
                         <Divider />
                         <GridRow columns={1}>
                             <GridColumn>
-                                <Header as='h3' content='My Recent Bookings' />
-                                <p>Your recent booking activities including Issued, Overdue, Pending Items</p>
+                                {activeTab === 'recentBookings' && <Header as='h3' content='My Recent Bookings' />}
+                                {activeTab === 'recentBookings' && <p>Your recent booking activities including Issued, Overdue, Pending Items</p>}
+                                {activeTab === 'bookingHistory' && <Header as='h3' content='My Booking History' />}
+                                {activeTab === 'bookingHistory' && <p>All your returned books</p>}
                             </GridColumn>
                         </GridRow>
                         <Divider />
                         <GridRow columns={1}>
                             <GridColumn>
-                                <MemberActiveBooking />
+                                {activeTab === 'recentBookings' && <MemberActiveBooking />}
+                                {activeTab === 'bookingHistory' && <MemberBookingHistory />}
                             </GridColumn>
                         </GridRow>
                         <Divider />

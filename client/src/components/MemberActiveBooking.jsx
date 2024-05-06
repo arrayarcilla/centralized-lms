@@ -27,7 +27,6 @@ function MemberActiveBooking() {
 		})
 
 		const data = await response.json();
-		console.log(data)
 		setTransactions(data)
 	}
 
