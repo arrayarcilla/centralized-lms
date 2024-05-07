@@ -106,7 +106,7 @@ function AddItemModal() {
                 onClose={() => setOpen(false)}
                 onOpen={() => setOpen(true)}
                 open={open}
-                trigger={<Button content='Manual Add' color='blue' basic />}
+                trigger={<Button content='Add New Book' color='blue' basic />}
             >
                 <ModalHeader>
                     Add New Book

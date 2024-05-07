@@ -37,7 +37,6 @@ function MyAccount() {
                             <GridColumn width={13} textAlign='right'>
                                 <Button content='My Recent Bookings' active={activeTab === 'recentBookings'} onClick={() => handleTabClick ('recentBookings')}/>
                                 <Button content='Booking History'  active={activeTab === 'bookingHistory'} onClick={() => handleTabClick ('bookingHistory')}/>
-                                <Button content='Account Settings' />
                             </GridColumn>
                         </GridRow>
                         <Divider />

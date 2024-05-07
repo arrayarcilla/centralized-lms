@@ -140,10 +140,9 @@ app.get('/items', async (req, res) => {
     }
 });
 
-  // Route to handle search
+  // Search book function
 app.get('/search', (req, res) => {
     try {
-        // console.log(req.query)
         const searchQuery = req.query.search;
         const category = req.query.category
         const page = parseInt(req.query.page) || 1;
@@ -306,6 +305,60 @@ app.get('/getBorrowHistory', (req, res) => {
         res.send(results)
     })
 });
+
+// Route to get user list with pagination
+app.get('/users', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1
+        const limit = 10
+        const offset = (page - 1) * limit
+        if (isNaN(page) || page < 1) {
+            throw new Error('Invalid page number')
+        }
+
+        const sqlQuery = `
+            SELECT * FROM user LIMIT ${limit} OFFSET ${offset}
+        `
+
+        const results = await new Promise((resolve, reject) => {
+            connection.query(sqlQuery, (err, results) => {
+                if (err) { reject(err) } else { resolve(results) }
+            })
+        })
+
+        res.status(200).json(results)
+    } catch (error) {
+        console.error('Error retrieving users: ', error)
+        res.status(500).json({ error: 'Internal server error' })
+    }
+})
+
+app.get('/searchMember', async (req, res) => {
+    try {
+        const searchQuery = req.query.search
+        const page = parseInt(req.query.page) ||  1
+        const itemsPerPage = 10
+        const offset = (page - 1) * itemsPerPage
+
+        if (isNaN(page) || page < 1) {
+            throw new Error('Invalid page number')
+        }
+
+        const sqlQuery =   `
+        SELECT *
+        FROM user
+        WHERE id LIKE '%${searchQuery}%' OR name LIKE '%${searchQuery}%' OR userType LIKE '%${searchQuery}%' 
+        LIMIT ${itemsPerPage} OFFSET ${offset}
+        `;
+
+        const [results] = await connection.promise().promise().query(sqlQuery)
+
+        res.json(results)
+    } catch(error) {
+        console.error('Error retrieving members: ', error)
+        res.status(500).json({ error: 'Internal server error' })
+    }
+})
 
 
 //------------------------------------------------LISTEN----------------------------------------------------

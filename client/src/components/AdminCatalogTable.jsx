@@ -7,15 +7,16 @@ import BookInfoModal from './BookInfoModal'
 //--- OTHER IMPORTS
 import {
     Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
+	Grid, GridRow, GridColumn,
 	Button
 } from 'semantic-ui-react';
 
 const AdminCatalogTable = () => {
 	const [items, setItems] = useState([]); //state that stores book data
+	const [page, setPage] = useState(1)
 	const [isLoading, setIsLoading] = useState([false]); //state for loading indicator
 	const [error, setError] = useState(null); //state to hold any error
 
-	let page = 1;
 
     const fetchItems = async (page) => {
         try {
@@ -39,6 +40,7 @@ const AdminCatalogTable = () => {
                 const data = await fetchItems(page);
                 setItems(data);
                 setIsLoading(false);
+				console.log('current page: ', page)
 				
             } catch (error) {
                 setError(error.message);
@@ -47,7 +49,7 @@ const AdminCatalogTable = () => {
         };
         
         fetchData();
-    }, []);
+    }, [page]);
 	
 	// console.log(items)
 
@@ -118,6 +120,18 @@ const AdminCatalogTable = () => {
 						)}
 					</TableBody>
 				</Table>
+
+				<br/>
+
+				<Grid>
+					<GridRow>
+						<GridColumn width={1}/>
+						<GridColumn width={15} textAlign='right'>
+							<Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchItems(Math.max(page - 1, 1))}}/>
+							<Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+						</GridColumn>
+					</GridRow>
+				</Grid>
 			</>
     );
 }

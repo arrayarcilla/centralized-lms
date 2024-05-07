@@ -37,54 +37,18 @@ function SideBar() {
 								Item Catalog
 							</MenuItem>	
 						</Link>
-						<Link to='/authors'>
-							<MenuItem link>
-								<Icon name="pencil alternate" />
-								Authors
-							</MenuItem>
-						</Link>
-						<Link to='/publishers'>
+						<Link to="/Member">
 							<MenuItem link>
 								<Icon name="user outline" />
-								Publishers
-							</MenuItem>
+								Members
+							</MenuItem> 
 						</Link>
-
-						<Popup
-							content={
-								<Menu vertical>
-									<Link to="/Member">
-										<MenuItem link>
-											<Icon name="user outline" />
-											Members
-										</MenuItem> 
-									</Link>
-									<Link to='/circulation'>
-										<MenuItem link>
-											<Icon name="file alternate outline" />
-											Circulations
-										</MenuItem>	
-									</Link> 
-									<Link to='/fees-and-payments'>
-										<MenuItem link>
-											<Icon name="calculator" />
-											Fees & Payments
-										</MenuItem>
-									</Link>
-								</Menu>
-							}
-							on="click"
-							position="right center"
-							size="large"
-							pinned
-							trigger={
-								<MenuItem as="a">
-									<Icon name="book"/>
-									Circulations
-								</MenuItem>
-							}
-						/>
-
+						<Link to='/circulation'>
+							<MenuItem link>
+								<Icon name="file alternate outline" />
+								Circulations
+							</MenuItem>	
+						</Link> 
 						<MenuItem as="a">
 							<Icon name="add user"/>
 							Procurements

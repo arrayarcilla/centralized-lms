@@ -1,6 +1,5 @@
 //--- Important Imports
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 //--- Component Imports
 import SideBar from '../../components/Sidebar';

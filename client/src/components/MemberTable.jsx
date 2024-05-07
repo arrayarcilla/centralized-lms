@@ -1,46 +1,97 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHeader,
-    TableHeaderCell,
-    TableRow
+    Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
+	Grid, GridRow, GridColumn,
+	Button,
 } from 'semantic-ui-react';
 
 function MemberTable() {
+	const [users, setUsers] = useState([])
+	const [page, setPage] = useState(1)
+	const [isLoading, setIsLoading] = useState(false)
+	const [error, setError] = useState(null)
+
+	const fetchUsers = async (page) => {
+		try {
+			const response = await fetch(`http://localhost:3000/users?page=${page}`);
+			if (!response.ok) {
+				throw new Error(`Error fetching items: ${response.status}`)
+			}
+
+			const data = await response.json()
+			return data
+		} catch (error) {
+			console.error('Error fetching items: ', error.message);
+			throw new Error('Failed to retrieve users')
+		}
+	}
+
+	useEffect(() => {
+		const fetchData = async () => {
+			try {
+				const data = await fetchUsers(page)
+				setUsers(data)
+				setIsLoading(false)
+			} catch (error) {
+				setError(error.message)
+				setIsLoading(false)
+			}
+		}
+		fetchData()
+	}, [page])
+
+	const memTypeMap = {
+		admin: 'Administrator',
+		member: 'Member'
+	}
+
 	return (
 		<>
-			<h1>Member Table</h1>
-
 			<Table singleLine>
 
 				<TableHeader>
 					<TableRow>
 						<TableHeaderCell>Id</TableHeaderCell>
 						<TableHeaderCell>Name</TableHeaderCell>
-						<TableHeaderCell>Login?</TableHeaderCell>
-						<TableHeaderCell>Balance</TableHeaderCell>
-						<TableHeaderCell>Reservations</TableHeaderCell>
-						<TableHeaderCell>Status</TableHeaderCell>
+						<TableHeaderCell>Type</TableHeaderCell>
 						<TableHeaderCell>Actions</TableHeaderCell>
 					</TableRow>
 				</TableHeader>
 
 				<TableBody>
-					<TableRow>
-						<TableCell></TableCell>
-						<TableCell></TableCell>
-						<TableCell></TableCell>
-						<TableCell></TableCell>
-						<TableCell></TableCell>
-						<TableCell></TableCell>
-						<TableCell></TableCell>
-					</TableRow>
+					{isLoading? (
+						<TableRow>
+							<TableCell colSpan={8} textAlign='center'>Loading...</TableCell>
+						</TableRow>
+					) : error ? (
+						<TableRow>
+							<TableCell colSpan={8} textAlign='center'>{error}</TableCell>
+						</TableRow>
+					) : (
+						users.map((user) => (
+							<TableRow key={user.id}>
+								<TableCell>{user.id}</TableCell>
+								<TableCell>{user.name}</TableCell>
+								<TableCell>{memTypeMap[user.userType] || user.userType}</TableCell>
+								<TableCell></TableCell>
+							</TableRow>
+						))
+					)}
 				</TableBody>
-
 			</Table>
+
+			<br/>
+
+			<Grid>
+					<GridRow>
+						<GridColumn width={1}/>
+						<GridColumn width={15} textAlign='right'>
+							<Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchUsers(Math.max(page - 1, 1))}}/>
+							<Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+						</GridColumn>
+					</GridRow>
+				</Grid>
 		</>
 	);
 }
