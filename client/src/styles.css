@@ -178,6 +178,10 @@ hr {
   padding: 2em 0;
 }
 
+.book-status {
+  margin-bottom: 0
+}
+
 .responsive-text {
   font-size: calc(1vw + 12px);
 }

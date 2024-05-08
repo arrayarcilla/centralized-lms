@@ -19,15 +19,17 @@ function MemberActiveBooking() {
 		others: 'Others',
 	};
 
-	const fetchData = async () => {
-		const response = await fetch('http://localhost:3000/getActiveTransactions', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ userId: userId})
-		})
+	const fetchData = async (userId) => {
+		try {
+			const response = await fetch(`http://localhost:3000/getActiveTransactions?id=${userId}`)
 
-		const data = await response.json();
-		setTransactions(data)
+			if (!response.ok) { throw new Error('Unauthorized or failed to fetch data') }
+			const data = await response.json();
+			return data
+		} catch (error) {
+			console.error('Error fetching active transaction history: ', error)
+			return []
+		}
 	}
 
 	const handleReturnBook = async (transactionId, itemId) => {
@@ -53,7 +55,13 @@ function MemberActiveBooking() {
 	}
 
 	useEffect(() => {
-		fetchData()
+		const fetchActiveTransactionHistory = async() => {
+			try {
+				const data = await fetchData(userId)
+				setTransactions(data)
+			} catch (error) { console.error(error) }
+		}
+		fetchActiveTransactionHistory()
 	}, [userId])
 
     return (

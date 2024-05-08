@@ -1,0 +1,143 @@
+import React, { useState, useEffect } from 'react';
+import {
+    Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
+	Grid, GridRow, GridColumn,
+	Button,
+} from 'semantic-ui-react';
+
+// display recent bookings
+
+function AllBorrowHistory({id}) {
+	const [page, setPage] = useState(1)
+	const [history, setHistory] = useState([])
+	const [isLoading, setIsLoading] = useState(false)
+	const [error, setError] = useState(null)
+	const [isSorted, setIsSorted] = useState(false)
+	const [isDisabled, setIsDisabled] = useState(false)
+
+	const userId = id
+
+	const categoryMap = {
+		fiction: 'Fiction',
+		non_fiction: 'Non-fiction',
+		reference: 'Reference',
+		others: 'Others',
+	};
+
+	const fetchAllTransactionHistory = async (userId, page) => {
+        try {
+			setIsLoading(true)
+            const response = await fetch(`http://localhost:3000/getAllTransactions?id=${userId}&page=${page}`);
+            if (!response.ok) { throw new Error('Unauthorized or failed to fetch data'); }         
+			const data = await response.json();
+			
+			return data 
+        } catch (error) {
+            console.error('Error fetching borrowing history:', error);
+            return [];
+        } finally {
+			setIsLoading(false)
+		}
+	}
+
+	useEffect(() => {
+        const fetchData = async() => {
+			const data = await fetchAllTransactionHistory(userId)
+			console.log('raw data', data)
+			if (data) {
+				const sortedTransactions = data.sort((a, b) => {
+					const dateA = new Date(a.return_date.trim() || '1970-01-01')
+					const dateB = new Date(b.return_date.trim() || '1970-01-01')
+					if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) { return 0 }
+					else { return dateB - dateA }
+				})
+				setHistory(sortedTransactions)
+				setIsSorted(true)
+			}
+		}
+		fetchData()
+	}, [userId])
+
+	const handlePreviousPage = async () => {
+		if (page > 1) {
+			setPage(page - 1);
+			const data = await fetchAllTransactionHistory(userId, page - 1); // Fetch data for new page
+    		setHistory(data);
+			setIsDisabled(false)
+		}
+	};
+	
+	const handleNextPage = async () => {
+		setPage(page + 1);
+		const data = await fetchAllTransactionHistory(userId, page + 1); // Fetch data for new page
+		if (data.length > 0) {
+			setHistory(data); // Update history only if data exists
+		} else {
+			setIsDisabled(true)
+		}
+	};
+
+    return (
+			<>
+				<Grid>
+					<GridRow>
+						<Table striped singleLine>
+							<TableHeader>
+								<TableRow>
+									<TableHeaderCell>Title</TableHeaderCell>
+									<TableHeaderCell>Author</TableHeaderCell>
+									<TableHeaderCell>Publisher</TableHeaderCell>
+									<TableHeaderCell>Type</TableHeaderCell>
+									<TableHeaderCell>Status</TableHeaderCell>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{isLoading ? (
+									<TableRow><TableCell colSpan={5} textAlign='center'>Loading transaction history...</TableCell></TableRow>
+								) : error ? (
+									<TableRow><TableCell colSpan={5} textAlign='center'>Error: {error}</TableCell></TableRow>
+								) : isSorted && history.length > 0 ? (
+									history.map((history) => (
+										<TableRow key={history.id}>
+											<TableCell>{history.title}</TableCell>
+											<TableCell>{history.author}</TableCell>
+											<TableCell>{history.publisher}</TableCell>
+											<TableCell>{categoryMap[history.category] || history.category}</TableCell>
+											<TableCell>
+												{history.return_date === '0000-00-00' ? (
+													<>
+														<h3 className='book-status' style={{ color: '#db2828' }}>Borrowed</h3>
+														<p><i>Due:</i> <b>{history.due_date.substring(0, 10)}</b></p>
+													</>
+												) : (
+													<>
+														<h3 className='book-status' style={{ color: '#1678c2' }}>Returned</h3>
+														<p><i>Return date:</i> <b>{history.return_date.substring(0, 10)}</b></p>
+													</>
+												)}
+												
+											</TableCell>
+										</TableRow>
+									))
+								) : (
+									<TableRow><TableCell colSpan={5} textAlign='center'>No transaction history found</TableCell></TableRow>
+								)}
+							</TableBody>
+						</Table>
+
+					
+							
+					</GridRow>
+					<GridRow>
+						<GridColumn width={1}/>
+						<GridColumn width={15} textAlign='right'>
+							<Button content='<' color='blue' disabled={ page === 1 } onClick={handlePreviousPage}/>
+							<Button content='>' color='blue' disabled={isDisabled} onClick={handleNextPage}/>
+						</GridColumn>
+					</GridRow>
+				</Grid> 
+			</>
+    );
+}
+
+export default AllBorrowHistory;

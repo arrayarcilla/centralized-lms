@@ -1,5 +1,10 @@
+//--- IMPORTANT IMPORTS
 import React, { useState, useEffect } from 'react';
 
+//--- COMPONENT IMPORTS
+import UserInfoModal from './UserInfoModal'
+
+//--- OTHER IMPORTS
 import {
     Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
 	Grid, GridRow, GridColumn,
@@ -74,7 +79,13 @@ function MemberTable() {
 								<TableCell>{user.id}</TableCell>
 								<TableCell>{user.name}</TableCell>
 								<TableCell>{memTypeMap[user.userType] || user.userType}</TableCell>
-								<TableCell></TableCell>
+								<TableCell>
+									<UserInfoModal
+										id={user.id}
+										name={user.name}
+										type={user.userType}
+									/>
+								</TableCell>
 							</TableRow>
 						))
 					)}

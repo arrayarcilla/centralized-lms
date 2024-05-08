@@ -261,11 +261,43 @@ app.post('/returnBook', (req, res) => {
     }
 });
 
-app.post('/getActiveTransactions', (req, res) => {
-    const userId = req.body.userId
-    if (!userId) {
-        return res.status(401).send('Unauthorized')
+// Route that gets all transactions of a user whether currently borrowed or returned
+app.get('/getAllTransactions', (req, res) => {
+    const userId = req.query.id
+    if (!userId) { return req.status(401).send('Unauthorized') }
+    
+    const page = parseInt(req.query.page) || 1
+    const limit = 5
+    const offset = (page - 1) * limit
+
+    if (isNaN(page) || page < 1) {
+        return res.status(400).send('Invalid page number')
     }
+
+    const query = `
+        SELECT i.*, t.*
+        FROM item i
+        INNER JOIN transaction t ON i.id = t.item_id
+        WHERE t.user_id = ?
+        ORDER BY CAST(t.return_date AS DATE) ASC
+        LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    connection.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error(err)
+            return res.status(500).send('Error fetching active transactions')
+        }
+
+        res.send(results)
+    })
+})
+
+// Route that gets all currently borrowed books of a user
+app.get('/getActiveTransactions', (req, res) => {
+    const userId = req.query.id
+    if (!userId) { return res.status(401).send('Unauthorized') }
+
     const query = `
         SELECT i.*, t.id, t.item_id, t.issue_date, t.due_date
         FROM item i
@@ -283,7 +315,7 @@ app.post('/getActiveTransactions', (req, res) => {
     })
 })
 
-
+// Route that gets all returned books of a user
 app.get('/getBorrowHistory', (req, res) => {
     const userId = req.query.id;
     if (!userId) {
@@ -336,7 +368,7 @@ app.get('/users', async (req, res) => {
 app.get('/searchMember', async (req, res) => {
     try {
         const searchQuery = req.query.search
-        const page = parseInt(req.query.page) ||  1
+        const page = parseInt(req.query.page)
         const itemsPerPage = 10
         const offset = (page - 1) * itemsPerPage
 
