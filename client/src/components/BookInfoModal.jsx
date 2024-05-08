@@ -1,6 +1,9 @@
 //--- IMPORTANT IMPORTS
 import React, { useState } from 'react';
 
+//--- COMPONENT IMPORTS
+import EditItemModal from './EditItemModal'
+
 //--- OTHER IMPORTS
 import {
     Modal, ModalHeader, ModalDescription, ModalContent, ModalActions, 
@@ -12,8 +15,11 @@ import {
     Image,
 } from 'semantic-ui-react';
 
-function BookInfoModal({id, author, title, category, isbn, publisher, year, copies}) {
-    const [open, setOpen] = useState(false);
+function BookInfoModal({open, handleCloseModal, book}) {
+    // if (open) { console.log(book) }
+
+    const [confirmOpen, setConfirmOpen] = useState(false)
+    const [successOpen, setSuccessOpen] = useState(false)
 
     const headerWidth = 2; //width for table header column
     const contentWidth = 14; //width for table content column
@@ -27,14 +33,13 @@ function BookInfoModal({id, author, title, category, isbn, publisher, year, copi
 
     return (
         <Modal
-            onClose={() => setOpen(false)}
-            onOpen={() => setOpen(true)}
+            onClose={handleCloseModal}
             open={open}
-            trigger={<Button size='tiny' icon='eye'/>} //change the trigger to be the title of the book or the 'eye' icon
         >
-            <ModalHeader>
-                Book Title Goes Here
-            </ModalHeader>
+            <ModalHeader><Grid columns={2}>
+                <GridColumn width='15'>View Book Details</GridColumn>
+                <GridColumn textAlign='right' width={1}><Button size='tiny' icon='close' basic negative onClick={handleCloseModal}/></GridColumn>
+            </Grid></ModalHeader>
             <ModalContent image>
                 <Image size='medium' src='https://react.semantic-ui.com/images/avatar/large/rachel.png' wrapped />
                 <ModalDescription style={{width: '100%'}}>
@@ -44,43 +49,44 @@ function BookInfoModal({id, author, title, category, isbn, publisher, year, copi
                         <TableBody>
                             <TableRow>
                                 <TableCell width={headerWidth}>Id</TableCell>
-                                <TableCell>{id}</TableCell>
+                                <TableCell>{book.id}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>Title</TableCell>
-                                <TableCell>{title}</TableCell>
+                                <TableCell>{book.title}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>Author</TableCell>
-                                <TableCell>{author}</TableCell>
+                                <TableCell>{book.author}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>Category</TableCell>
-                                <TableCell>{categoryMap[category] || category}</TableCell>
+                                <TableCell>{categoryMap[book.category] || book.category}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>ISBN</TableCell>
-                                <TableCell>{isbn}</TableCell>
+                                <TableCell>{book.isbn}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>Publisher</TableCell>
-                                <TableCell>{publisher}</TableCell>
+                                <TableCell>{book.publisher}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>Year</TableCell>
-                                <TableCell>{year}</TableCell>
+                                <TableCell>{book.year}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell width={headerWidth}>Copies</TableCell>
-                                <TableCell>{copies}</TableCell>
+                                <TableCell>{book.copies}</TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
                 </ModalDescription>             
             </ModalContent>
             <ModalActions>
-                <Button color='black' onClick={() => setOpen(false)} content='Nope' />
-                <Button content='Yes' labelPosition='right' icon='checkmark' onClick={() => setOpen(false)} positive />
+                <Button content='Delete' labelPosition='left' icon='trash alternate' negative />
+                <EditItemModal book={book}/>
+                <Button content='Cancel' onClick={handleCloseModal}/>
             </ModalActions>
         </Modal>
 

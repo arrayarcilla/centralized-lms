@@ -182,8 +182,8 @@ function SearchCatalog() {
                     <GridRow>
                         <GridColumn width={1}/>
                         <GridColumn width={15} textAlign='right'>
-                            <Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchItems(Math.max(page - 1, 1))}}/>
-                            <Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+                            <Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchItems(Math.max(page - 1, 1))}}/>
+                            <Button icon='arrow right' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
                         </GridColumn>
                     </GridRow>
                 </Grid>

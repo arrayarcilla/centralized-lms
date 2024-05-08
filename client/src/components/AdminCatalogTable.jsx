@@ -14,8 +14,21 @@ import {
 const AdminCatalogTable = () => {
 	const [items, setItems] = useState([]); //state that stores book data
 	const [page, setPage] = useState(1)
+	
 	const [isLoading, setIsLoading] = useState([false]); //state for loading indicator
 	const [error, setError] = useState(null); //state to hold any error
+	const [isModalOpen, setIsModalOpen] = useState(false)
+	const [selectedBook, setSelectedBook] = useState(null)
+
+	
+	//Handles Modal Opening and Closing
+	const handleOpenModal = (item) => {
+		setSelectedBook(item)
+		setIsModalOpen(true)
+	}
+	const handleCloseModal = () => {
+		setIsModalOpen(false)
+	}
 
 
     const fetchItems = async (page) => {
@@ -40,7 +53,6 @@ const AdminCatalogTable = () => {
                 const data = await fetchItems(page);
                 setItems(data);
                 setIsLoading(false);
-				console.log('current page: ', page)
 				
             } catch (error) {
                 setError(error.message);
@@ -103,16 +115,7 @@ const AdminCatalogTable = () => {
 									<TableCell>{item.is_available ? 'NO' : 'YES'}</TableCell>
 									<TableCell>{item.copies}</TableCell>
 									<TableCell> 
-										<BookInfoModal 
-											id={item.id}
-											author={item.author}
-											title={item.title}
-											category={item.category}
-											isbn={item.isbn}
-											publisher={item.publisher}
-											year={item.year}
-											copies={item.copies}
-										/>
+										<Button size='tiny' icon='eye' onClick={() => { handleOpenModal(item) }}/>
 									</TableCell>
 									
 								</TableRow>
@@ -127,11 +130,19 @@ const AdminCatalogTable = () => {
 					<GridRow>
 						<GridColumn width={1}/>
 						<GridColumn width={15} textAlign='right'>
-							<Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchItems(Math.max(page - 1, 1))}}/>
-							<Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); fetchItems(Math.max(page - 1, 1))}}/>
+							<Button icon='arrow right' color='blue' onClick={() => {setPage(page + 1)}}/>
 						</GridColumn>
 					</GridRow>
 				</Grid>
+
+				{isModalOpen && 
+					<BookInfoModal 
+						open={isModalOpen}
+						handleCloseModal={handleCloseModal}
+						book={selectedBook}
+					/>
+				}
 			</>
     );
 }

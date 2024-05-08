@@ -94,9 +94,10 @@ app.patch('/updateItem', (req, res) => {
                         SET author = "`+ item.author +`",
                             title = "`+ item.title +`",
                             isbn = '`+ item.isbn +`',
-                            category = '`+ item.catgory +`',
+                            category = '`+ item.category +`',
                             publisher = "`+ item.publisher +`",
                             year = '`+ item.year +`',
+                            available = '`+ item.copies +`',
                             copies = `+ item.copies +`
                         WHERE id = `+ item.id +`;`, (err, result) => {
         if (err) throw err
