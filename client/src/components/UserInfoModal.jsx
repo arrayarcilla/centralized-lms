@@ -15,9 +15,7 @@ import {
     Image,
 } from 'semantic-ui-react';
 
-function UserInfoModal({id, name, type}) {
-    const [open, setOpen] = useState(false);
-
+function UserInfoModal({open, handleCloseModal, user}) {
     const headerWidth = 2; //width for table header column
     const contentWidth = 14; //width for table content column
 
@@ -28,14 +26,12 @@ function UserInfoModal({id, name, type}) {
 
     return (
         <Modal
-            onClose={() => setOpen(false)}
-            onOpen={() => setOpen(true)}
+            onClose={handleCloseModal}
             open={open}
-            trigger={<Button size='tiny' icon='eye'/>} //change the trigger to be the title of the book or the 'eye' icon
         >
             <ModalHeader><Grid columns={2}>
                 <GridColumn width='15'>User Info</GridColumn>
-                <GridColumn textAlign='right' width={1}><Button size='tiny' icon='close' basic negative/></GridColumn>
+                <GridColumn textAlign='right' width={1}><Button size='tiny' icon='close' basic negative onClick={handleCloseModal}/></GridColumn>
             </Grid></ModalHeader>
             <ModalContent image>
                 <Grid container>
@@ -49,30 +45,32 @@ function UserInfoModal({id, name, type}) {
                                     <TableBody>
                                         <TableRow>
                                             <TableCell width={headerWidth}>Id</TableCell>
-                                            <TableCell>{id}</TableCell>
+                                            <TableCell>{user.id}</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell width={headerWidth}>Name</TableCell>
-                                            <TableCell>{name}</TableCell>
+                                            <TableCell>{user.name}</TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell width={headerWidth}>User Type</TableCell>
-                                            <TableCell>{typeMap[type] || type}</TableCell>
+                                            <TableCell>{typeMap[user.type] || user.type}</TableCell>
                                         </TableRow>
                                     </TableBody>
                                 </Table>
                             </ModalDescription> 
                         </GridColumn>
                     </GridRow>
+                    <Divider/>
                     <GridRow columns={1} stretched>
                         <GridColumn>
-                            <AllBorrowHistory id={id}/>
+                            <Header as='h3' content='Member Transaction History'/>
+                            <AllBorrowHistory id={user.id}/>
                         </GridColumn>
                     </GridRow>
                 </Grid>
             </ModalContent>
             <ModalActions>
-                <Button content='Close' onClick={() => setOpen(false)} primary/>
+                <Button content='Close' onClick={handleCloseModal} primary/>
             </ModalActions>
         </Modal>
 

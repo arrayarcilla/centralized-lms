@@ -11,7 +11,6 @@ function AllBorrowHistory({id}) {
 	const [page, setPage] = useState(1)
 	const [history, setHistory] = useState([])
 	const [isLoading, setIsLoading] = useState(false)
-	const [error, setError] = useState(null)
 	const [isSorted, setIsSorted] = useState(false)
 	const [isDisabled, setIsDisabled] = useState(false)
 
@@ -23,40 +22,6 @@ function AllBorrowHistory({id}) {
 		reference: 'Reference',
 		others: 'Others',
 	};
-
-	const fetchAllTransactionHistory = async (userId, page) => {
-        try {
-			setIsLoading(true)
-            const response = await fetch(`http://localhost:3000/getAllTransactions?id=${userId}&page=${page}`);
-            if (!response.ok) { throw new Error('Unauthorized or failed to fetch data'); }         
-			const data = await response.json();
-			
-			return data 
-        } catch (error) {
-            console.error('Error fetching borrowing history:', error);
-            return [];
-        } finally {
-			setIsLoading(false)
-		}
-	}
-
-	useEffect(() => {
-        const fetchData = async() => {
-			const data = await fetchAllTransactionHistory(userId)
-			console.log('raw data', data)
-			if (data) {
-				const sortedTransactions = data.sort((a, b) => {
-					const dateA = new Date(a.return_date.trim() || '1970-01-01')
-					const dateB = new Date(b.return_date.trim() || '1970-01-01')
-					if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) { return 0 }
-					else { return dateB - dateA }
-				})
-				setHistory(sortedTransactions)
-				setIsSorted(true)
-			}
-		}
-		fetchData()
-	}, [userId])
 
 	const handlePreviousPage = async () => {
 		if (page > 1) {
@@ -77,6 +42,39 @@ function AllBorrowHistory({id}) {
 		}
 	};
 
+	const fetchAllTransactionHistory = async (userId, page) => {
+        try {
+			setIsLoading(true)
+            const response = await fetch(`http://localhost:3000/getAllTransactionsPerId?id=${userId}&page=${page}`);
+            if (!response.ok) { throw new Error('Unauthorized or failed to fetch data'); }         
+			const data = await response.json();
+			
+			return data 
+        } catch (error) {
+            console.error('Error fetching borrowing history:', error);
+            return [];
+        } finally {
+			setIsLoading(false)
+		}
+	}
+
+	useEffect(() => {
+        const fetchData = async() => {
+			const data = await fetchAllTransactionHistory(userId)
+			if (data) {
+				const sortedTransactions = data.sort((a, b) => {
+					const dateA = new Date(a.return_date.trim() || '1970-01-01')
+					const dateB = new Date(b.return_date.trim() || '1970-01-01')
+					if (isNaN(dateA.getTime()) || isNaN(dateB.getTime())) { return 0 }
+					else { return dateB - dateA }
+				})
+				setHistory(sortedTransactions)
+				setIsSorted(true)
+			}
+		}
+		fetchData()
+	}, [userId])
+
     return (
 			<>
 				<Grid>
@@ -94,8 +92,6 @@ function AllBorrowHistory({id}) {
 							<TableBody>
 								{isLoading ? (
 									<TableRow><TableCell colSpan={5} textAlign='center'>Loading transaction history...</TableCell></TableRow>
-								) : error ? (
-									<TableRow><TableCell colSpan={5} textAlign='center'>Error: {error}</TableCell></TableRow>
 								) : isSorted && history.length > 0 ? (
 									history.map((history) => (
 										<TableRow key={history.id}>

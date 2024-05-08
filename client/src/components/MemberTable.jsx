@@ -13,9 +13,26 @@ import {
 
 function MemberTable() {
 	const [users, setUsers] = useState([])
+	const [passedUser, setPassedUser] = useState({
+		id: '',
+		name: '',
+		type: ''
+	})
 	const [page, setPage] = useState(1)
+	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(null)
+
+	// Handles Modal Opening and Closing
+	const handleOpenModal = (userId, userName, userType) => { 
+		setPassedUser({
+			id: userId,
+			name: userName,
+			type: userType
+		})
+		setIsModalOpen(true) 
+	}
+	const handleCloseModal = () => { setIsModalOpen(false) }
 
 	const fetchUsers = async (page) => {
 		try {
@@ -65,7 +82,7 @@ function MemberTable() {
 				</TableHeader>
 
 				<TableBody>
-					{isLoading? (
+					{isLoading ? (
 						<TableRow>
 							<TableCell colSpan={8} textAlign='center'>Loading...</TableCell>
 						</TableRow>
@@ -80,11 +97,7 @@ function MemberTable() {
 								<TableCell>{user.name}</TableCell>
 								<TableCell>{memTypeMap[user.userType] || user.userType}</TableCell>
 								<TableCell>
-									<UserInfoModal
-										id={user.id}
-										name={user.name}
-										type={user.userType}
-									/>
+									<Button size='tiny' icon='eye' onClick={() => { handleOpenModal(user.id, user.name, user.userType) }}/>
 								</TableCell>
 							</TableRow>
 						))
@@ -103,6 +116,14 @@ function MemberTable() {
 						</GridColumn>
 					</GridRow>
 				</Grid>
+
+				{isModalOpen && (
+					<UserInfoModal
+						open={isModalOpen}
+						handleCloseModal={handleCloseModal}
+						user={passedUser}
+					/>
+				)}
 		</>
 	);
 }

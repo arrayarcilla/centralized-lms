@@ -262,7 +262,7 @@ app.post('/returnBook', (req, res) => {
 });
 
 // Route that gets all transactions of a user whether currently borrowed or returned
-app.get('/getAllTransactions', (req, res) => {
+app.get('/getAllTransactionsPerId', (req, res) => {
     const userId = req.query.id
     if (!userId) { return req.status(401).send('Unauthorized') }
     
