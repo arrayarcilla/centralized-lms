@@ -57,8 +57,6 @@ function AdminCatalogSearch() {
                     <GridColumn width={1}/>
                     <GridColumn width={15} textAlign='right'>
                         <AddItemModal />
-                        <Button content='Authors' as={Link} to='/authors' color='blue' basic />
-                        <Button content='Publishers' as={Link} to='/publishers' color='blue' basic />
                         <Button content='Refresh' color='blue' icon='refresh' basic />
                     </GridColumn>
                 </GridRow>

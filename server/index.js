@@ -66,10 +66,11 @@ app.post('/create_user', (req, res) => {
 //--------------------------------------ITEMS-----------------------------------------
 
 app.delete('/deleteItem', (req, res) => {
-    connection.query(`UPDATE item
-                        SET available = 0
-                        WHERE id = `+ req.body.id +`;`, (err, result) => {
-        res.render("product", { products: result });
+    console.log('deleted yay')
+    connection.query(
+        `UPDATE item
+        SET is_deleted = 1
+        WHERE id = `+ req.body.id +`;`, (err, result) => {
     });
 });
 
@@ -88,21 +89,29 @@ app.post('/addItem', (req, res) => {
     }
 })
 
-app.patch('/updateItem', (req, res) => {
+app.patch('/updateItem', async (req, res) => {
     const item = req.body
-    connection.query(`UPDATE item
+    const newCopies = item.currentCopies + item.addedCopies
+
+    try {
+        // Perform the update to the database
+        connection.query(`UPDATE item
                         SET author = "`+ item.author +`",
                             title = "`+ item.title +`",
                             isbn = '`+ item.isbn +`',
                             category = '`+ item.category +`',
                             publisher = "`+ item.publisher +`",
                             year = '`+ item.year +`',
-                            available = '`+ item.copies +`',
-                            copies = `+ item.copies +`
+                            available = available + '`+ item.addedCopies +`',
+                            copies = `+ newCopies +`
                         WHERE id = `+ item.id +`;`, (err, result) => {
-        if (err) throw err
-        res.send('product')
-    })
+            if (err) throw err
+            res.send('product')
+        })
+    } catch (error) {
+        console.error('Error updating item: ', error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
 })
 
 // app.get('/getAvail', (req, res) => {

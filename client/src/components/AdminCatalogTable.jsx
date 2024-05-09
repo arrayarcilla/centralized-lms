@@ -18,9 +18,9 @@ const AdminCatalogTable = () => {
 	const [isLoading, setIsLoading] = useState([false]); //state for loading indicator
 	const [error, setError] = useState(null); //state to hold any error
 	const [isModalOpen, setIsModalOpen] = useState(false)
+
 	const [selectedBook, setSelectedBook] = useState(null)
 
-	
 	//Handles Modal Opening and Closing
 	const handleOpenModal = (item) => {
 		setSelectedBook(item)
@@ -30,15 +30,12 @@ const AdminCatalogTable = () => {
 		setIsModalOpen(false)
 	}
 
-
     const fetchItems = async (page) => {
         try {
             const response = await fetch(`http://localhost:3000/items?page=${page}`);
-            
             if (!response.ok) {
                 throw new Error(`Error fetching items: ${response.status}`);
-            }
-            
+            }    
             const data = await response.json();
             return data;
         } catch (error) {
@@ -52,14 +49,12 @@ const AdminCatalogTable = () => {
             try {
                 const data = await fetchItems(page);
                 setItems(data);
-                setIsLoading(false);
-				
+                setIsLoading(false);		
             } catch (error) {
                 setError(error.message);
                 setIsLoading(false);
             }
         };
-        
         fetchData();
     }, [page]);
 	
@@ -74,37 +69,25 @@ const AdminCatalogTable = () => {
 
     return (
 			<>
-				<Table>
-
+				<Table className='fixed-width-table'>
 					<TableHeader>
 						<TableRow>
-							<TableHeaderCell>Id</TableHeaderCell>
-							<TableHeaderCell>Author</TableHeaderCell>
-							<TableHeaderCell>Title</TableHeaderCell>
-							<TableHeaderCell>ISBN</TableHeaderCell>
-							<TableHeaderCell>Category</TableHeaderCell>
-							<TableHeaderCell>Publisher</TableHeaderCell>
-							<TableHeaderCell>Available?</TableHeaderCell>
-							<TableHeaderCell>No. of Copies</TableHeaderCell>
-							<TableHeaderCell>Actions</TableHeaderCell>
+							<TableHeaderCell width={1}>Id</TableHeaderCell>
+							<TableHeaderCell width={2}>Author</TableHeaderCell>
+							<TableHeaderCell width={4}>Title</TableHeaderCell>
+							<TableHeaderCell width={2}>ISBN</TableHeaderCell>
+							<TableHeaderCell width={2}>Category</TableHeaderCell>
+							<TableHeaderCell width={3}>Publisher</TableHeaderCell>
+							<TableHeaderCell width={1}>Available?</TableHeaderCell>
+							<TableHeaderCell width={1}>No. of Copies</TableHeaderCell>
+							<TableHeaderCell width={1}>Actions</TableHeaderCell>
 						</TableRow>
 					</TableHeader>
 
 					<TableBody>
-						{isLoading ? (
-							<TableRow>
-								<TableCell colSpan={8} textAlign='center'>
-									Loading...
-								</TableCell>
-							</TableRow>
-						) : error ? (
-							<TableRow>
-								<TableCell colSpan={8} textAlign='center'>
-									{error}
-								</TableCell>
-							</TableRow>
-						) : (
-							items.map((item) => (
+						{ isLoading ? ( <TableRow><TableCell colSpan={8} textAlign='center'>Loading...</TableCell></TableRow> ) 
+						: error ? ( <TableRow><TableCell colSpan={8} textAlign='center'>{error}</TableCell></TableRow> )
+						: ( items.map((item) => (
 								<TableRow key={item.id}>
 									<TableCell>{item.id}</TableCell>
 									<TableCell>{item.author}</TableCell>
@@ -112,12 +95,20 @@ const AdminCatalogTable = () => {
 									<TableCell>{item.isbn}</TableCell>
 									<TableCell>{categoryMap[item.category] || item.category}</TableCell>
 									<TableCell>{item.publisher}</TableCell>
-									<TableCell>{item.is_available ? 'NO' : 'YES'}</TableCell>
-									<TableCell>{item.copies}</TableCell>
-									<TableCell> 
-										<Button size='tiny' icon='eye' onClick={() => { handleOpenModal(item) }}/>
+									<TableCell textAlign='center' >
+										{ item.is_deleted === 1 ? (
+											<b style={{ color: 'red' }}>DELETED</b>
+										) : (
+											item.available === 0 ? (
+												<><b style={{ color: 'red' }}>NO</b><br/>{ item.available }</>
+											) : (
+												<><b style={{ color: 'green' }}>YES</b><br/>{ item.available }</>
+											)
+										)}
+										
 									</TableCell>
-									
+									<TableCell><h3>{item.copies}</h3></TableCell>
+									<TableCell><Button size='tiny' icon='eye' onClick={() => { handleOpenModal(item) }}/></TableCell>
 								</TableRow>
 							))
 						)}
@@ -136,13 +127,14 @@ const AdminCatalogTable = () => {
 					</GridRow>
 				</Grid>
 
-				{isModalOpen && 
-					<BookInfoModal 
+				{isModalOpen && (
+						<BookInfoModal 
 						open={isModalOpen}
 						handleCloseModal={handleCloseModal}
 						book={selectedBook}
 					/>
-				}
+				)}
+
 			</>
     );
 }

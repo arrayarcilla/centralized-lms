@@ -91,30 +91,12 @@ function BookBorrowModal({open, handleCloseModal, book}) {
                                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam malesuada nunc libero, at porta nulla dapibus vel. Aliquam volutpat condimentum elit non mollis. Quisque elementum id dolor id rutrum. Duis elementum iaculis neque, fermentum viverra tortor scelerisque non. Sed porttitor viverra magna id congue. </p>
                                 <Table definition>
                                     <TableBody>
-                                        <TableRow>
-                                            <TableCell width={headerWidth}>Author</TableCell>
-                                            <TableCell>{book.author}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell width={headerWidth}>Category</TableCell>
-                                            <TableCell>{categoryMap[book.category] || book.category}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell width={headerWidth}>ISBN</TableCell>
-                                            <TableCell>{book.isbn}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell width={headerWidth}>Publisher</TableCell>
-                                            <TableCell>{book.publisher}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell width={headerWidth}>Publication Year</TableCell>
-                                            <TableCell>{book.year}</TableCell>
-                                        </TableRow>
-                                        <TableRow>
-                                            <TableCell width={headerWidth}>Copies</TableCell>
-                                            <TableCell>{book.copies}</TableCell>
-                                        </TableRow>
+                                        <TableRow><TableCell width={headerWidth}>Author</TableCell><TableCell>{book.author}</TableCell></TableRow>
+                                        <TableRow><TableCell width={headerWidth}>Category</TableCell><TableCell>{categoryMap[book.category] || book.category}</TableCell></TableRow>
+                                        <TableRow><TableCell width={headerWidth}>ISBN</TableCell><TableCell>{book.isbn}</TableCell></TableRow>
+                                        <TableRow><TableCell width={headerWidth}>Publisher</TableCell><TableCell>{book.publisher}</TableCell></TableRow>
+                                        <TableRow><TableCell width={headerWidth}>Publication Year</TableCell><TableCell>{book.year}</TableCell></TableRow>
+                                        <TableRow><TableCell width={headerWidth}>Copies</TableCell><TableCell>{book.copies}</TableCell></TableRow>
                                     </TableBody>
                                 </Table>
                             </ModalDescription>       

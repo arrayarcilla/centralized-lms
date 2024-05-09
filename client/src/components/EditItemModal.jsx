@@ -9,11 +9,11 @@ import {
     Header,
     Segment,
     Button,
+    Popup,
 } from 'semantic-ui-react';
 
 
-function EditItemModal({book}) {
-    const [open, setOpen] = useState(false)
+function EditItemModal({ book, open, closeModal }) {
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [successOpen, setSuccessOpen] = useState(false)
 
@@ -25,20 +25,15 @@ function EditItemModal({book}) {
         isbn: book.isbn,
         publisher: book.publisher,
         year: book.year,
-        copies: book.copies,
+        currentCopies: book.copies,
+        addedCopies: 0,
     });
 
     // Functions increment or decrement value of copies on button click
     const handleIncrement = (e) => {
         e.preventDefault();
-        setFormData((prevFormData) => ({ ...prevFormData, copies: prevFormData.copies + 1}))
-    }
-    const handleDecrement = (e) => {
-        e.preventDefault();
-        if (formData.copies > 1) {
-            setFormData((prevFormData) => ({ ...prevFormData, copies: prevFormData.copies - 1 }));
-        }
-    }
+        setFormData((prevFormData) => ({ ...prevFormData, addedCopies: prevFormData.addedCopies + 1 }));
+      }
 
     // Sets values for category select dropdown menu
     const categoryOptions = [
@@ -51,39 +46,22 @@ function EditItemModal({book}) {
     const handleSelectChange = (e, { value }) => {
         setFormData((prevFormData) => ({ ...prevFormData, category: value }))
     }
-    //Handles value change for counter
-    const handleCounterChange = (e) => {
-        const { name, value } = e.target
-        setFormData({
-            ...formData,
-            [name]: value === '' ? 1 : parseInt(value),
-        })
-    }
-    // Handles value change for all other inputs
     const handleChange = (e) => {
         setFormData({ 
             ...formData, [e.target.name]: e.target.value 
         });
-    };
+    }; 
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
         try {
-            // console.log('formData: ', formData)
             const response = await fetch('http://localhost:3000/updateItem', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' }, // Set headers for JSON data
                 body: JSON.stringify(formData), // Convert formData to JSON string
             });
-
-            if (response.ok) {
-                setFormData((prevFormData) => ({ ...prevFormData, copies: 1 }));
-            }
-        } catch (error) {
-            console.error('Error adding item: ', error);
-            // Error handlers go here
-        }
+            if (response.ok) { setFormData((prevFormData) => ({ ...prevFormData, addedCopies: 1 })); }
+        } catch (error) { console.error('Error adding item: ', error); }
     };
 
     const categoryMap = {
@@ -103,18 +81,15 @@ function EditItemModal({book}) {
                 isbn: book.isbn,
                 publisher: book.publisher,
                 year: book.year,
-                copies: book.copies,
-            })
-        }
+                currentCopies: book.copies,
+                addedCopies: 0,
+            })}
     }, [open])
 
     return (
         <>
             <Modal
-                onClose={() => setOpen(false)}
-                onOpen={() => setOpen(true)}
                 open={open}
-                trigger={<Button content='Edit' labelPosition='left' icon='edit' primary/>}
             >
                 <ModalHeader>
                     Edit Book Info
@@ -138,25 +113,14 @@ function EditItemModal({book}) {
                                     <FormInput name='isbn' label='ISBN' placeholder={book.isbn} width={3} onChange={handleChange} />
                                     <FormInput name='publisher' label='Publisher' placeholder={book.publisher} width={5} onChange={handleChange} />
                                     <FormInput name='year' label='Year of Publication' placeholder={book.year} width={3} onChange={handleChange} />
-                                    <label
-                                        style={{
-                                            display: 'block',
-                                            margin: '0 0 0.28571429rem 0',
-                                            color: 'rgba(0, 0, 0, .87)',
-                                            fontSize: '0.92857143em',
-                                            fontWeight: '700',
-                                            textTransform: 'none',
-                                        }}
-                                    >
-                                        No. of Copies
+                                    <label style={{ display: 'block', margin: '0 0 0.28571429rem 0', olor: 'rgba(0, 0, 0, .87)', fontSize: '0.92857143em', fontWeight: '700', textTransform: 'none', }}>
+                                        Add new copies. Current number of copies: {formData.currentCopies}
                                     </label>
                                     <FormGroup>
-                                        <FormButton icon='minus' onClick={handleDecrement}/>
-                                        <FormInput name='copies' width={2} value={formData.copies} onChange={handleCounterChange}/>
+                                        <FormInput name='addedCopies' width={2} value={formData.addedCopies}/>
                                         <FormButton icon='plus' onClick={handleIncrement}/>
                                     </FormGroup>
                                     <FormGroup>
-
                                         <Modal
                                             onClose={() => setConfirmOpen(false)}
                                             onOpen={() => setConfirmOpen(true)}
@@ -168,39 +132,17 @@ function EditItemModal({book}) {
                                                 <Header>Your changes: </Header>
                                                 <Table definition>
                                                     <TableBody>
-                                                        <TableRow>
-                                                            <TableCell>Title</TableCell>
-                                                            <TableCell>{formData.title}</TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell>Author</TableCell>
-                                                            <TableCell>{formData.author}</TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell>Category</TableCell>
-                                                            <TableCell>{formData.category}</TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell>ISBN</TableCell>
-                                                            <TableCell>{formData.isbn}</TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell>Publisher</TableCell>
-                                                            <TableCell>{formData.publisher}</TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell>Year</TableCell>
-                                                            <TableCell>{formData.year}</TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell>Copies</TableCell>
-                                                            <TableCell>{formData.copies}</TableCell>
-                                                        </TableRow>
+                                                        <TableRow><TableCell>Title</TableCell><TableCell>{formData.title}</TableCell></TableRow>
+                                                        <TableRow><TableCell>Author</TableCell><TableCell>{formData.author}</TableCell></TableRow>
+                                                        <TableRow><TableCell>Category</TableCell><TableCell>{formData.category}</TableCell></TableRow>
+                                                        <TableRow><TableCell>ISBN</TableCell><TableCell>{formData.isbn}</TableCell></TableRow>
+                                                        <TableRow><TableCell>Publisher</TableCell><TableCell>{formData.publisher}</TableCell></TableRow>
+                                                        <TableRow><TableCell>Year</TableCell><TableCell>{formData.year}</TableCell></TableRow>
+                                                        <TableRow><TableCell>Copies</TableCell><TableCell>Adding <b>{formData.addedCopies}</b> copies. <i>Library will have <b>{formData.addedCopies + formData.currentCopies}</b> copies after editing</i></TableCell></TableRow>
                                                     </TableBody>
                                                 </Table>
                                             </ModalContent>
                                             <ModalActions>
-
                                                 <Modal
                                                     onClose={() => setSuccessOpen(false)}
                                                     onOpen={() => setSuccessOpen(true)}
@@ -210,15 +152,14 @@ function EditItemModal({book}) {
                                                     <ModalHeader content='Success!' />
                                                     <ModalContent content='Book has been successfully edited.' />
                                                     <ModalActions>
-                                                        <Button content='OK' positive onClick={() => {setSuccessOpen(false); setConfirmOpen(false); setOpen(false)}} />
+                                                        <Button content='OK' positive onClick={() => {setSuccessOpen(false); setConfirmOpen(false); closeModal(false); window.location.reload()}} />
                                                     </ModalActions>
                                                 </Modal>
-                                                
                                                 <Button content='No' negative onClick={() => setConfirmOpen(false)} />
                                             </ModalActions>
                                         </Modal>
 
-                                        <FormButton content='Cancel' onClick={() => setOpen(false)} negative/>
+                                        <FormButton content='Cancel' negative onClick={() => closeModal(false)}/>
                                     </FormGroup>
                                 </Form>
                             </Segment>
@@ -226,8 +167,6 @@ function EditItemModal({book}) {
                     </div>
                 )}
             </Modal>
-
-            
         </>
     )
 }
