@@ -71,16 +71,7 @@ function MemberTable() {
 	return (
 		<>
 			<Table singleLine>
-
-				<TableHeader>
-					<TableRow>
-						<TableHeaderCell>Id</TableHeaderCell>
-						<TableHeaderCell>Name</TableHeaderCell>
-						<TableHeaderCell>Type</TableHeaderCell>
-						<TableHeaderCell>Actions</TableHeaderCell>
-					</TableRow>
-				</TableHeader>
-
+				<TableHeader><TableRow><TableHeaderCell>Id</TableHeaderCell><TableHeaderCell>Name</TableHeaderCell><TableHeaderCell>Type</TableHeaderCell><TableHeaderCell>Actions</TableHeaderCell></TableRow></TableHeader>
 				<TableBody>
 					{isLoading ? (
 						<TableRow>
@@ -104,26 +95,24 @@ function MemberTable() {
 					)}
 				</TableBody>
 			</Table>
-
 			<br/>
-
 			<Grid>
-					<GridRow>
-						<GridColumn width={1}/>
-						<GridColumn width={15} textAlign='right'>
-							<Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchUsers(Math.max(page - 1, 1))}}/>
-							<Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
-						</GridColumn>
-					</GridRow>
-				</Grid>
+				<GridRow>
+					<GridColumn width={1}/>
+					<GridColumn width={15} textAlign='right'>
+						<Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchUsers(Math.max(page - 1, 1))}}/>
+						<Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+					</GridColumn>
+				</GridRow>
+			</Grid>
 
-				{isModalOpen && (
-					<UserInfoModal
-						open={isModalOpen}
-						handleCloseModal={handleCloseModal}
-						user={passedUser}
-					/>
-				)}
+			{isModalOpen && (
+				<UserInfoModal
+					open={isModalOpen}
+					handleCloseModal={handleCloseModal}
+					user={passedUser}
+				/>
+			)}
 		</>
 	);
 }

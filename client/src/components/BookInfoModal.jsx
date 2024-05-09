@@ -74,12 +74,12 @@ function BookInfoModal({open, handleCloseModal, book}) {
                     </ModalDescription>
                 </ModalContent>
                 <ModalActions>
-                    {book.available !== book.copies && <p>Cannot delete book record until all copies have been returned</p>}
+                    {book?.available !== book?.copies && <p>Cannot delete book record until all copies have been returned</p>}
                     <Modal
                         onClose={() => setConfirmOpen(false)}
                         onOpen={() => setConfirmOpen(true)}
                         open={confirmOpen}
-                        trigger={<Button content='Delete' labelPosition='left' icon='trash alternate' negative disabled={book.available !== book.copies || book.is_deleted === 1}/>}
+                        trigger={<Button content='Delete' labelPosition='left' icon='trash alternate' negative disabled={book?.available !== book?.copies || book?.is_deleted === 1}/>}
                     >
                         <ModalHeader content='Are you sure you want to delete this book?' />
                         <ModalActions>

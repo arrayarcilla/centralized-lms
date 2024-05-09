@@ -271,7 +271,30 @@ app.post('/returnBook', (req, res) => {
     }
 });
 
-// Route that gets all transactions of a user whether currently borrowed or returned
+// Route that gets ALL TRANSACTIONS
+app.get('/getAllTransactions', (req, res) => {
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const offset = (page - 1) * limit
+
+    if (isNaN(page) || page < 1) { return res.status(400).send('Invalid page number') }
+    
+    const query = `SELECT t.*, u.name, i.title
+            FROM transaction t
+            JOIN user u on t.user_id = u.id
+            JOIN item i on t.item_id = i.id
+            LIMIT ${limit} OFFSET ${offset}`;
+            
+    connection.query(query, (err, results) => {
+        if (err) {
+            console.error(err)
+            return res.status(500).send('Error fetching active transactions')
+        }
+    res.send(results)
+    })
+})
+
+// Route that gets all transactions of a GIVEN USER ID
 app.get('/getAllTransactionsPerId', (req, res) => {
     const userId = req.query.id
     if (!userId) { return req.status(401).send('Unauthorized') }

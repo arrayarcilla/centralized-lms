@@ -11,12 +11,12 @@ import {
     Button, 
 	} from 'semantic-ui-react';
 
-function AdminMemberSearch() {
+function AdminTransactionSearch() {
     return (
         <>
             <Grid columns={2} stackable relaxed='very'>
                 <GridRow only='computer tablet'>
-                    <GridColumn width={8}><Header as='h1' content='Member Table' /></GridColumn>
+                    <GridColumn width={8}><Header as='h1' content='Transaction History Table' /></GridColumn>
                     <GridColumn width={8}>
                         <Segment floated='right'>
                             <Form>
@@ -40,4 +40,4 @@ function AdminMemberSearch() {
     )
 }
 
-export default AdminMemberSearch;
+export default AdminTransactionSearch;

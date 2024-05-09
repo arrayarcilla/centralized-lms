@@ -9,7 +9,7 @@ import AdminMemberSearch from '../../components/AdminMemberSearch'
 //--- Other Imports
 import { 
     Segment, 
-	} from 'semantic-ui-react';
+} from 'semantic-ui-react';
 
 function Member() {
 	return (
