@@ -14,19 +14,44 @@ function AdminTransactionTable() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [error, setError] = useState(null)
 
+	const fetchTransactions = async (page) => {
+		try {
+			const response = await fetch(`http://localhost:3000/getAllTransactions?page=${page}`)
+			if (!response.ok) { throw new Error('Unauthorized or failed to fetch data') }
+			const data = await response.json()
+
+			return data
+		} catch (error) {
+			console.error('Error fetching browsing history:', error)
+			return []
+		}
+	}
+
 	useEffect(() => {
-		const fetchTransactions = async () => {
+		const fetchData = async () => {
 			try {
-				const response = await fetch(`http://localhost:3000/getAllTransactions?page=${page}`)
-				const data = await response.json()
-				
+				const data = await fetchTransactions(page)
 				setTransactions(data)
-				console.log(transactions)
 			} catch (error) { console.error('Error fetching transactions: ', error) }
 		}
 
-		fetchTransactions()
-	}, [])
+		fetchData()
+	}, [page])
+
+	const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchTransactions(page - 1)
+			setTransactions(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (transactions.length === 10) {
+			setPage(page + 1); 
+			const data = await fetchTransactions(page + 1)
+			setTransactions(data)
+		}
+	};
 
     return (
         <>
@@ -58,8 +83,8 @@ function AdminTransactionTable() {
 				<GridRow>
 					<GridColumn width={1}/>
 					<GridColumn width={15} textAlign='right'>
-						<Button content='<' color='blue'/>
-						<Button content='>' color='blue'/>
+					<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+					<Button icon='arrow right' color='blue' disabled={ transactions.length !== 10 } onClick={handleNextPage}/>
 					</GridColumn>
 				</GridRow>
 			</Grid>

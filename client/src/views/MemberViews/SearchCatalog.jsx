@@ -8,13 +8,11 @@ import BookBorrowModal from '../../components/BookBorrowModal'
 //--- Other Imports
 import { 
     Segment, 
-    Container, 
     GridRow, GridColumn, Grid, 
     Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
     Header, 
     FormButton, FormInput, FormSelect, FormGroup, Form, 
-    Icon, 
-    Image,
+    Icon,
     Button 
 } from 'semantic-ui-react';
 
@@ -43,16 +41,6 @@ function SearchCatalog() {
 		reference: 'Reference',
 		others: 'Others',
     }
-    // Handles value change for category dropdown menu
-    const handleCategoryChange = (e, { value }) => {
-       setFormData((prevFormData) => ({ ...prevFormData, category: value }))
-    }
-     // Handles value change for all other inputs
-     const handleChange = (e) => {
-        setFormData({ 
-            ...formData, [e.target.name]: e.target.value 
-        });
-    };  
     // Handles Modal Opening and Closing
     const handleOpenModal = (item) => {
         setSelectedBook(item)
@@ -61,6 +49,16 @@ function SearchCatalog() {
     const handleCloseModal = () => {
         setIsModalOpen(false);
     };
+    // Handles value change for category dropdown menu
+    const handleCategoryChange = (e, { value }) => {
+       setFormData((prevFormData) => ({ ...prevFormData, category: value }))
+    }
+     // Handles value change for all other inputs
+    const handleChange = (e) => {
+        setFormData({ 
+            ...formData, [e.target.name]: e.target.value 
+        });
+    };  
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -73,9 +71,6 @@ function SearchCatalog() {
         try {
             const searchUrl = new URL('/search', 'http://localhost:3000');
             searchUrl.searchParams.append('search', search);
-            if (category) {
-              searchUrl.searchParams.append('category', category);
-            }
             searchUrl.searchParams.append('page', page); // Include current page
         
             console.log('Search URL:', searchUrl.toString());
@@ -122,6 +117,21 @@ function SearchCatalog() {
         fetchData();
     }, [page]);
 
+    const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchItems(page - 1)
+			setSearchResults(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (searchResults.length === 10) {
+			setPage(page + 1); 
+			const data = await fetchItems(page + 1)
+			setSearchResults(data)
+		}
+	};
+
     return (
         <>
             <MenuBar />
@@ -143,7 +153,6 @@ function SearchCatalog() {
                                         <FormGroup>
                                             <FormButton type='submit' content='Search' floated='right' onClick={handleSubmit} primary/>
                                             <FormButton content='Clear' floated='right' negative onClick={() => window.location.reload()}/>
-                                            
                                         </FormGroup>
                                     </GridColumn>
                                 </GridRow>     
@@ -182,8 +191,8 @@ function SearchCatalog() {
                     <GridRow>
                         <GridColumn width={1}/>
                         <GridColumn width={15} textAlign='right'>
-                            <Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchItems(Math.max(page - 1, 1))}}/>
-                            <Button icon='arrow right' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+                            <Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+                            <Button icon='arrow right' color='blue' disabled={ searchResults.length !== 10 } onClick={handleNextPage}/>
                         </GridColumn>
                     </GridRow>
                 </Grid>

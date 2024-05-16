@@ -11,7 +11,7 @@ import {
 	Button
 } from 'semantic-ui-react';
 
-const AdminCatalogTable = () => {
+const AdminCatalogTable = ({ results }) => {
 	const [items, setItems] = useState([]); //state that stores book data
 	const [page, setPage] = useState(1)
 	
@@ -44,21 +44,42 @@ const AdminCatalogTable = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const data = await fetchItems(page);
-                setItems(data);
-                setIsLoading(false);		
-            } catch (error) {
-                setError(error.message);
-                setIsLoading(false);
-            }
-        };
-        fetchData();
-    }, [page]);
-	
-	// console.log(items)
+	useEffect(() => {
+		const fetchData = async () => {
+		  try {
+			if (results && results.length > 0) {
+			  // Use search results if available
+			  setItems(results);
+			  setIsLoading(false)
+			} else {
+			  // Fetch data based on current page state
+			  const data = await fetchItems(page);
+			  setItems(data);
+			  setIsLoading(false)
+			}
+		  } catch (error) {
+			console.error('Error fetching items:', error.message);
+			setIsLoading(false);
+		  }
+		};
+		fetchData();
+	  }, [results, page]);
+
+	const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchItems(page - 1)
+			setItems(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (items.length === 10) {
+			setPage(page + 1); 
+			const data = await fetchItems(page + 1)
+			setItems(data)
+		}
+	};
+
 
 	const categoryMap = {
 		fiction: 'Fiction',
@@ -121,8 +142,8 @@ const AdminCatalogTable = () => {
 					<GridRow>
 						<GridColumn width={1}/>
 						<GridColumn width={15} textAlign='right'>
-							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); fetchItems(Math.max(page - 1, 1))}}/>
-							<Button icon='arrow right' color='blue' onClick={() => {setPage(page + 1)}}/>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ items.length !== 10 } onClick={handleNextPage}/>
 						</GridColumn>
 					</GridRow>
 				</Grid>

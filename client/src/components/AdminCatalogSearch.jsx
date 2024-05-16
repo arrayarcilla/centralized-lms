@@ -1,6 +1,5 @@
 //--- Important Imports
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState} from 'react';
 
 //--- Component Imports
 import AddItemModal from './AddItemModal';
@@ -9,17 +8,21 @@ import AddItemModal from './AddItemModal';
 import { 
     Segment, 
     Grid, GridRow, GridColumn, 
-    Menu, MenuItem,
     Header,
-    Popup,
-    Form, FormGroup, FormInput, FormSelect, FormButton,
+    Form, FormGroup, FormInput, FormButton,
 	Divider,
-    Icon,
-    Image,
     Button, 
 	} from 'semantic-ui-react';
 
-function AdminCatalogSearch() {
+function AdminCatalogSearch({ onSubmit, searchTerm }) {
+    const [formData, setFormData] = useState(searchTerm || '')
+
+    const handleChange = (e) => { setFormData(e.target.value) }
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        onSubmit(formData);
+    }
 
     return (
         
@@ -30,29 +33,16 @@ function AdminCatalogSearch() {
                     <GridColumn width={8}><Header as='h1' content='Catalog Items' /></GridColumn>
                     <GridColumn width={8}>
                         <Segment floated='right'>
-                            <Form>
+                            <Form onSubmit={handleSearch}>
                                 <FormGroup>
-                                    <FormInput />
+                                    <FormInput name='search' value={formData} onChange={handleChange} placeholder='Search for book title or author name'/>
                                     <FormButton content='Search' primary />
                                 </FormGroup>
                             </Form>
                         </Segment>
                     </GridColumn>
                 </GridRow>
-                <GridRow only='mobile'>
-                    <GridColumn width={3}><Header as='h1' content='Catalog Items' /></GridColumn>
-                    <GridColumn width={13}>
-                        <Segment floated='left'>
-                            <Form>
-                                <FormInput />
-                                <FormButton content='Search' primary />
-                            </Form>
-                        </Segment>
-                    </GridColumn>
-                </GridRow>
-
                 <Divider />
-
                 <GridRow>
                     <GridColumn width={1}/>
                     <GridColumn width={15} textAlign='right'>

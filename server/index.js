@@ -351,6 +351,10 @@ app.get('/getActiveTransactions', (req, res) => {
 // Route that gets all returned books of a user
 app.get('/getBorrowHistory', (req, res) => {
     const userId = req.query.id;
+    const page = parseInt(req.query.page) || 1
+    const limit = 10
+    const offset = (page - 1) * limit
+
     if (!userId) {
         return res.status(401).send('Unauthorized')
     }
@@ -358,7 +362,9 @@ app.get('/getBorrowHistory', (req, res) => {
     SELECT i.*, t.id, t.item_id, t.return_date
     FROM item i
     INNER JOIN transaction t ON i.id = t.item_id
-    WHERE t.user_id = ? AND t.return_date IS NOT NULL AND t.return_date <> '0000-00-00';
+    WHERE t.user_id = ? AND t.return_date IS NOT NULL AND t.return_date <> '0000-00-00'
+    ORDER BY t.return_date DESC
+    LIMIT ${limit} OFFSET ${offset};
     `;
 
     connection.query(query, [userId], (err, results) => {

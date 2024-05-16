@@ -12,35 +12,8 @@ function AllBorrowHistory({id}) {
 	const [history, setHistory] = useState([])
 	const [isLoading, setIsLoading] = useState(false)
 	const [isSorted, setIsSorted] = useState(false)
-	const [isDisabled, setIsDisabled] = useState(false)
 
 	const userId = id
-
-	const categoryMap = {
-		fiction: 'Fiction',
-		non_fiction: 'Non-fiction',
-		reference: 'Reference',
-		others: 'Others',
-	};
-
-	const handlePreviousPage = async () => {
-		if (page > 1) {
-			setPage(page - 1);
-			const data = await fetchAllTransactionHistory(userId, page - 1); // Fetch data for new page
-    		setHistory(data);
-			setIsDisabled(false)
-		}
-	};
-	
-	const handleNextPage = async () => {
-		setPage(page + 1);
-		const data = await fetchAllTransactionHistory(userId, page + 1); // Fetch data for new page
-		if (data.length > 0) {
-			setHistory(data); // Update history only if data exists
-		} else {
-			setIsDisabled(true)
-		}
-	};
 
 	const fetchAllTransactionHistory = async (userId, page) => {
         try {
@@ -48,7 +21,7 @@ function AllBorrowHistory({id}) {
             const response = await fetch(`http://localhost:3000/getAllTransactionsPerId?id=${userId}&page=${page}`);
             if (!response.ok) { throw new Error('Unauthorized or failed to fetch data'); }         
 			const data = await response.json();
-			
+
 			return data 
         } catch (error) {
             console.error('Error fetching borrowing history:', error);
@@ -74,6 +47,29 @@ function AllBorrowHistory({id}) {
 		}
 		fetchData()
 	}, [userId])
+
+	const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchAllTransactionHistory(userId, page - 1)
+			setHistory(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (history.length === 5) {
+			setPage(page + 1); 
+			const data = await fetchAllTransactionHistory(userId, page + 1)
+			setHistory(data)
+		}
+	};
+
+	const categoryMap = {
+		fiction: 'Fiction',
+		non_fiction: 'Non-fiction',
+		reference: 'Reference',
+		others: 'Others',
+	};
+
 
     return (
 			<>
@@ -127,8 +123,8 @@ function AllBorrowHistory({id}) {
 					<GridRow>
 						<GridColumn width={1}/>
 						<GridColumn width={15} textAlign='right'>
-							<Button content='<' color='blue' disabled={ page === 1 } onClick={handlePreviousPage}/>
-							<Button content='>' color='blue' disabled={isDisabled} onClick={handleNextPage}/>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ history.length !== 5 } onClick={handleNextPage}/>
 						</GridColumn>
 					</GridRow>
 				</Grid> 

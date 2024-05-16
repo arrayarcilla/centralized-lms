@@ -8,6 +8,7 @@ import {
 // display recent bookings
 
 function MemberBookingHistory() {
+	const [page, setPage] = useState(1)
 	const [history, setHistory] = useState([])
 	const userId = localStorage.getItem('userId')
 
@@ -18,34 +19,43 @@ function MemberBookingHistory() {
 		others: 'Others',
 	};
 
-	const fetchData = async (userId) => {
+	const fetchBookingHistory = async (userId, page) => {
         try {
-            const response = await fetch(`http://localhost:3000/getBorrowHistory?id=${userId}`);
-        
-            if (!response.ok) {
-              // Handle non-OK status code (e.g., 401 Unauthorized)
-              throw new Error('Unauthorized or failed to fetch data');
-            }
-        
+            const response = await fetch(`http://localhost:3000/getBorrowHistory?id=${userId}&page=${page}`);
+            if (!response.ok) { throw new Error('Unauthorized or failed to fetch data'); }
             const data = await response.json();
+
             return data
-            
         } catch (error) {
             console.error('Error fetching borrowing history:', error);
-            // Handle errors (e.g., network errors)
-            return []; // Or handle error state differently
+            return [];
         }
 	}
 
 	useEffect(() => {
-        const fetchBookingHistory = async() => {
+        const fetchData = async() => {
             try {
-                const data = await fetchData(userId);
+                const data = await fetchBookingHistory(userId);
                 setHistory(data);
             } catch (error) { console.error(error) }
         }
-		fetchBookingHistory()
+		fetchData()
 	}, [userId])
+
+	const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchBookingHistory(userId, page - 1)
+			setHistory(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (history.length === 10) {
+			setPage(page + 1); 
+			const data = await fetchBookingHistory(userId, page + 1)
+			setHistory(data)
+		}
+	};
 
     return (
 			<>
@@ -73,6 +83,13 @@ function MemberBookingHistory() {
 								))}
 							</TableBody>
 						</Table>
+					</GridRow>
+					<GridRow>
+						<GridColumn width={1}/>
+						<GridColumn width={15} textAlign='right'>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ history.length !== 10 } onClick={handleNextPage}/>
+						</GridColumn>
 					</GridRow>
 				</Grid> 
 			</>

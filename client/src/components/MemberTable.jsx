@@ -13,11 +13,7 @@ import {
 
 function MemberTable() {
 	const [users, setUsers] = useState([])
-	const [passedUser, setPassedUser] = useState({
-		id: '',
-		name: '',
-		type: ''
-	})
+	const [passedUser, setPassedUser] = useState({ id: '', name: '', type: '' })
 	const [page, setPage] = useState(1)
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
@@ -37,11 +33,9 @@ function MemberTable() {
 	const fetchUsers = async (page) => {
 		try {
 			const response = await fetch(`http://localhost:3000/users?page=${page}`);
-			if (!response.ok) {
-				throw new Error(`Error fetching items: ${response.status}`)
-			}
-
+			if (!response.ok) { throw new Error(`Error fetching items: ${response.status}`) }
 			const data = await response.json()
+			
 			return data
 		} catch (error) {
 			console.error('Error fetching items: ', error.message);
@@ -62,6 +56,21 @@ function MemberTable() {
 		}
 		fetchData()
 	}, [page])
+
+	const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchUsers(page - 1)
+			setUsers(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (users.length === 10) {
+			setPage(page + 1); 
+			const data = await fetchUsers(page + 1)
+			setUsers(data)
+		}
+	};
 
 	const memTypeMap = {
 		admin: 'Administrator',
@@ -100,8 +109,8 @@ function MemberTable() {
 				<GridRow>
 					<GridColumn width={1}/>
 					<GridColumn width={15} textAlign='right'>
-						<Button content='<' color='blue' disabled={ page === 1 } onClick={() => {setPage(Math.max(page - 1, 1)); console.log('current page: ', page); fetchUsers(Math.max(page - 1, 1))}}/>
-						<Button content='>' color='blue' onClick={() => {setPage(page + 1); console.log('current page: ', page)}}/>
+						<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+						<Button icon='arrow right' color='blue' disabled={ users.length !== 10 } onClick={handleNextPage}/>
 					</GridColumn>
 				</GridRow>
 			</Grid>
