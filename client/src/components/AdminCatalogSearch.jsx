@@ -28,14 +28,13 @@ function AdminCatalogSearch({ onSubmit, searchTerm }) {
         
         <>
             <Grid columns={2} stackable relaxed='very'>
-
-                <GridRow only='computer tablet'>
-                    <GridColumn width={8}><Header as='h1' content='Catalog Items' /></GridColumn>
-                    <GridColumn width={8}>
+                <GridRow>
+                    <GridColumn width={6}><Header as='h1' content='Catalog Items' /></GridColumn>
+                    <GridColumn width={10} stretched>
                         <Segment floated='right'>
                             <Form onSubmit={handleSearch}>
                                 <FormGroup>
-                                    <FormInput name='search' value={formData} onChange={handleChange} placeholder='Search for book title or author name'/>
+                                    <FormInput name='search' value={formData} onChange={handleChange} width={14} placeholder='Search for book title or author name'/>
                                     <FormButton content='Search' primary />
                                 </FormGroup>
                             </Form>
@@ -47,11 +46,9 @@ function AdminCatalogSearch({ onSubmit, searchTerm }) {
                     <GridColumn width={1}/>
                     <GridColumn width={15} textAlign='right'>
                         <AddItemModal />
-                        <Button content='Refresh' color='blue' icon='refresh' basic />
+                        <Button content='Refresh' color='blue' icon='refresh' basic onClick={() => window.location.reload()}/>
                     </GridColumn>
                 </GridRow>
-                
-
             </Grid>
         </>
     )

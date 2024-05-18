@@ -7,11 +7,11 @@ import BookBorrowModal from '../../components/BookBorrowModal'
 
 //--- Other Imports
 import { 
-    Segment, 
+    Segment, Divider,
     GridRow, GridColumn, Grid, 
     Table, TableBody, TableCell, TableHeader, TableHeaderCell, TableRow,
     Header, 
-    FormButton, FormInput, FormSelect, FormGroup, Form, 
+    FormButton, FormInput, FormGroup, Form, 
     Icon,
     Button 
 } from 'semantic-ui-react';
@@ -136,29 +136,40 @@ function SearchCatalog() {
         <>
             <MenuBar />
             <div className='member-page-content'>
-                <Segment padded raised>
-                    <Header as='h1' content='Search' />
-                    <Segment>
-                        <Form>
-                            <Grid columns={2} stackable>
-                                <GridRow>
-                                    <GridColumn width={11}>  
-                                        <FormGroup>
-                                            <Icon name='search' size='big' />
-                                            <FormSelect name='category' placeholder='All' options={ categoryOptions } width={5} onChange={handleCategoryChange}/>
-                                            <FormInput name='search' width={11} onChange={handleChange}/>
-                                        </FormGroup>
-                                    </GridColumn>
-                                    <GridColumn width={5} >
-                                        <FormGroup>
-                                            <FormButton type='submit' content='Search' floated='right' onClick={handleSubmit} primary/>
-                                            <FormButton content='Clear' floated='right' negative onClick={() => window.location.reload()}/>
-                                        </FormGroup>
-                                    </GridColumn>
-                                </GridRow>     
-                            </Grid>
-                        </Form>
-                    </Segment>
+            <Segment padded raised>
+            
+                <Grid columns={2} stackable relaxed='very'>
+                    <GridRow>
+                        <GridColumn width={6}><Header as='h1' content='Catalog Items' /></GridColumn>
+                        <GridColumn width={10} stretched>
+                            <Segment floated='right'>
+                                <Form>
+                                    <FormGroup>
+                                        <Icon name='search' size='big' />
+                                        <FormInput name='search' onChange={handleChange} width={14} placeholder='Search for book title or author name'/>
+                                        <FormButton type='submit' content='Search' floated='right' onClick={handleSubmit} primary/>
+                                    </FormGroup>
+                                </Form>
+                            </Segment>
+                        </GridColumn>
+                    </GridRow>
+                    <Divider />
+                    <GridRow>
+                        <GridColumn width={1}/>
+                        <GridColumn width={15} textAlign='right'>
+                            <Button content='Refresh' color='blue' icon='refresh' basic onClick={() => window.location.reload()}/>
+                        </GridColumn>
+                    </GridRow>
+                </Grid>
+
+                <Grid>
+					<GridRow>
+						<GridColumn width={15} textAlign='left'>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ searchResults.length !== 10 } onClick={handleNextPage}/>
+						</GridColumn>
+					</GridRow>
+				</Grid>
 
                     {searchResults.length > 0 && (
                         <Table striped singleLine>
@@ -197,12 +208,11 @@ function SearchCatalog() {
                     </GridRow>
                 </Grid>
 
-                </Segment>
-
                 {isModalOpen && selectedBook && (
                     <BookBorrowModal open={isModalOpen} handleCloseModal={handleCloseModal} book={selectedBook} />
                 )}
 
+            </Segment>
             </div>
         </>
     )

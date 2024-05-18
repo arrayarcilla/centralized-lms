@@ -9,6 +9,7 @@ import {
 
 function MemberActiveBooking() {
 	const [transactions, setTransactions] = useState([])
+	const [page, setPage] = useState(1)
 	const [isReturning, setIsReturning] = useState(false)
 	const userId = localStorage.getItem('userId')
 
@@ -21,7 +22,7 @@ function MemberActiveBooking() {
 
 	const fetchData = async (userId) => {
 		try {
-			const response = await fetch(`http://localhost:3000/getActiveTransactions?id=${userId}`)
+			const response = await fetch(`http://localhost:3000/getActiveTransactions?id=${userId}&page=${page}`)
 
 			if (!response.ok) { throw new Error('Unauthorized or failed to fetch data') }
 			const data = await response.json();
@@ -55,14 +56,29 @@ function MemberActiveBooking() {
 	}
 
 	useEffect(() => {
-		const fetchActiveTransactionHistory = async() => {
+		const fetchData = async() => {
 			try {
 				const data = await fetchData(userId)
 				setTransactions(data)
 			} catch (error) { console.error(error) }
 		}
-		fetchActiveTransactionHistory()
+		fetchData()
 	}, [userId])
+
+	const handlePrevPage = async () => { 
+		if (page > 1) {
+			setPage(page - 1) 
+			const data = await fetchData(page - 1)
+			setTransactions(data)
+		} 
+	};
+	const handleNextPage = async () => {
+		if (transactions.length === 5) {
+			setPage(page + 1); 
+			const data = await fetchData(page + 1)
+			setTransactions(data)
+		}
+	};
 
     return (
 			<>
@@ -80,18 +96,18 @@ function MemberActiveBooking() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{transactions.map((transaction) => (
-									<TableRow key={transaction.id}>
-										<TableCell>{transaction.id}</TableCell>
-										<TableCell>{transaction.title}</TableCell>
-										<TableCell>{transaction.author}</TableCell>
-										<TableCell>{transaction.publisher}</TableCell>
-										<TableCell>{categoryMap[transaction.category] || transaction.category}</TableCell>
+								{transactions?.map((transaction) => (
+									<TableRow key={transaction?.id}>
+										<TableCell>{transaction?.id}</TableCell>
+										<TableCell>{transaction?.title}</TableCell>
+										<TableCell>{transaction?.author}</TableCell>
+										<TableCell>{transaction?.publisher}</TableCell>
+										<TableCell>{categoryMap[transaction?.category] || transaction?.category}</TableCell>
 										<TableCell>
-											<h3>Due date: <i style={{ color: '#1678c2' }}>{transaction.due_date.substring(0, 10)}</i></h3>
+											<h3>Due date: <i style={{ color: '#1678c2' }}>{transaction?.due_date.substring(0, 10)}</i></h3>
 											<Button 
 												content='Return'
-												onClick={() => handleReturnBook(transaction.id, transaction.item_id)}
+												onClick={() => handleReturnBook(transaction?.id, transaction?.item_id)}
 											/>
 										</TableCell>
 									</TableRow>
@@ -100,6 +116,15 @@ function MemberActiveBooking() {
 						</Table>
 					</GridRow>
 				</Grid> 
+				<Grid>
+					<GridRow>
+						<GridColumn width={1} />
+						<GridColumn width={15} textAlign='right'>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ transactions?.length !== 5 } onClick={handleNextPage}/>
+						</GridColumn>
+					</GridRow>
+				</Grid>
 			</>
     );
 }

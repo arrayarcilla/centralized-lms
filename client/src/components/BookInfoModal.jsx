@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 
 //--- COMPONENT IMPORTS
+import ItemBorrowHistory from './ItemBorrowHistory';
 import EditItemModal from './EditItemModal'
 
 //--- OTHER IMPORTS
@@ -55,23 +56,37 @@ function BookInfoModal({open, handleCloseModal, book}) {
                     <GridColumn textAlign='right' width={1}><Button size='tiny' icon='close' basic negative onClick={handleCloseModal}/></GridColumn>
                 </Grid></ModalHeader>
                 <ModalContent image>
-                    <Image size='medium' src='https://react.semantic-ui.com/images/avatar/large/rachel.png' wrapped />
-                    <ModalDescription style={{width: '100%'}}>
-                    <Header content='Title' />
-                        <p>Book description goes here lmao</p>
-                        <Table definition>
-                            <TableBody>
-                                <TableRow><TableCell width={headerWidth}>Id</TableCell><TableCell>{book?.id}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>Title</TableCell><TableCell>{book?.title}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>Author</TableCell><TableCell>{book?.author}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>Category</TableCell><TableCell>{categoryMap[book?.category] || book?.category}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>ISBN</TableCell><TableCell>{book?.isbn}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>Publisher</TableCell><TableCell>{book?.publisher}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>Year</TableCell><TableCell>{book?.year}</TableCell></TableRow>
-                                <TableRow><TableCell width={headerWidth}>Copies</TableCell><TableCell>{book?.copies}</TableCell></TableRow>
-                            </TableBody>
-                        </Table>
-                    </ModalDescription>
+                    <Grid container>
+                        <GridRow columns={2} stretched>
+                            <GridColumn width={6}>
+                                <Image size='medium' src='https://react.semantic-ui.com/images/avatar/large/rachel.png' wrapped />
+                            </GridColumn>
+                            <GridColumn width={10}>
+                                <ModalDescription style={{width: '100%'}}>
+                                <Header content={book?.title} />
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam malesuada nunc libero, at porta nulla dapibus vel. Aliquam volutpat condimentum elit non mollis. Quisque elementum id dolor id rutrum. Duis elementum iaculis neque, fermentum viverra tortor scelerisque non. Sed porttitor viverra magna id congue.</p>
+                                    <Table definition>
+                                        <TableBody>
+                                            <TableRow><TableCell width={headerWidth}>Id</TableCell><TableCell>{book?.id}</TableCell></TableRow>
+                                            <TableRow><TableCell width={headerWidth}>Author</TableCell><TableCell>{book?.author}</TableCell></TableRow>
+                                            <TableRow><TableCell width={headerWidth}>Category</TableCell><TableCell>{categoryMap[book?.category] || book?.category}</TableCell></TableRow>
+                                            <TableRow><TableCell width={headerWidth}>ISBN</TableCell><TableCell>{book?.isbn}</TableCell></TableRow>
+                                            <TableRow><TableCell width={headerWidth}>Publisher</TableCell><TableCell>{book?.publisher}</TableCell></TableRow>
+                                            <TableRow><TableCell width={headerWidth}>Year</TableCell><TableCell>{book?.year}</TableCell></TableRow>
+                                            <TableRow><TableCell width={headerWidth}>Copies</TableCell><TableCell>{book?.copies}</TableCell></TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </ModalDescription>
+                            </GridColumn>
+                        </GridRow>
+                        <Divider />
+                        <GridRow columns={1} stretched>
+                            <GridColumn>
+                                <Header as='h3' content='Book Transaction History' />
+                                <ItemBorrowHistory id={book?.id}/>
+                            </GridColumn>
+                        </GridRow>
+                    </Grid>
                 </ModalContent>
                 <ModalActions>
                     {book?.available !== book?.copies && <p>Cannot delete book record until all copies have been returned</p>}

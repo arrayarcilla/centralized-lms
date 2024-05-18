@@ -79,6 +79,14 @@ function MemberTable() {
 
 	return (
 		<>
+			<Grid>
+				<GridRow>
+					<GridColumn width={15} textAlign='left'>
+						<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+						<Button icon='arrow right' color='blue' disabled={ users.length !== 10 } onClick={handleNextPage}/>
+					</GridColumn>
+				</GridRow>
+			</Grid>
 			<Table singleLine>
 				<TableHeader><TableRow><TableHeaderCell>Id</TableHeaderCell><TableHeaderCell>Name</TableHeaderCell><TableHeaderCell>Type</TableHeaderCell><TableHeaderCell>Actions</TableHeaderCell></TableRow></TableHeader>
 				<TableBody>

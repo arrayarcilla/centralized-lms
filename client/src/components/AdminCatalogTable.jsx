@@ -90,6 +90,14 @@ const AdminCatalogTable = ({ results }) => {
 
     return (
 			<>
+				<Grid>
+					<GridRow>
+						<GridColumn width={15} textAlign='left'>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ items.length !== 10 } onClick={handleNextPage}/>
+						</GridColumn>
+					</GridRow>
+				</Grid>
 				<Table className='fixed-width-table'>
 					<TableHeader>
 						<TableRow>

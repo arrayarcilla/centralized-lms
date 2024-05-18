@@ -61,6 +61,14 @@ function MemberBookingHistory() {
 			<>
 				<Grid>
 					<GridRow>
+						<GridColumn width={15} textAlign='left'>
+							<Button icon='arrow left' color='blue' disabled={ page === 1 } onClick={handlePrevPage}/>
+							<Button icon='arrow right' color='blue' disabled={ history?.length !== 10 } onClick={handleNextPage}/>
+						</GridColumn>
+					</GridRow>
+				</Grid>
+				<Grid>
+					<GridRow>
 						<Table striped singleLine>
 							<TableHeader>
 								<TableRow>

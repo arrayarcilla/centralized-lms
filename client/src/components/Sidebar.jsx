@@ -49,10 +49,6 @@ function SideBar() {
 								Circulations
 							</MenuItem>	
 						</Link> 
-						<MenuItem as="a">
-							<Icon name="add user"/>
-							Procurements
-						</MenuItem>
 					</Sidebar>  
         </div>
     );

@@ -184,6 +184,36 @@ app.get('/search', (req, res) => {
     }
 });
   
+// Shows all users who returned and borrowed the book
+app.get('/getItemBorrowHistory', (req, res) => {
+    try {
+        const bookId = parseInt(req.query.book_id)
+        const page = parseInt(req.query.page) || 1
+        const itemsPerPage = 10
+        const offset = (page - 1) * itemsPerPage
+        if (isNaN(page) || page < 1) { throw new Error ('Invalid page number') }
+
+        const sqlQuery=`
+            SELECT t.id AS transaction_id, t.return_date, u.id, u.name
+            FROM transaction t
+            INNER JOIN user u ON t.user_id = u.id
+            WHERE t.item_id = ${bookId} AND t.return_date IS NOT NULL
+            ORDER BY t.id DESC
+            LIMIT ${itemsPerPage} OFFSET ${offset}
+        `
+
+        connection.query(sqlQuery, (err, results) => {
+            if (err) {
+                console.error('Error executing MySQL query: ' + err.stack)
+                res.status(500).json({ error: 'Internal server error' })
+                return
+            } res.json(results)
+        })
+    } catch (error) {
+        console.error('Error retrieving items: ', error)
+        res.status(500).json({ error: 'Internal server error' })
+    }
+})
 
 app.post('/getItem', (req, res) => {
     connection.query(`SELECT * FROM item WHERE id="`+ req.body.id+`"`, (err, result) => {
@@ -279,10 +309,11 @@ app.get('/getAllTransactions', (req, res) => {
 
     if (isNaN(page) || page < 1) { return res.status(400).send('Invalid page number') }
     
-    const query = `SELECT t.*, u.name, i.title
+    const query = `SELECT t.*, u.name, i.title, i.author, i.isbn, i.category
             FROM transaction t
             JOIN user u on t.user_id = u.id
             JOIN item i on t.item_id = i.id
+            ORDER BY t.id DESC
             LIMIT ${limit} OFFSET ${offset}`;
             
     connection.query(query, (err, results) => {
@@ -331,11 +362,16 @@ app.get('/getActiveTransactions', (req, res) => {
     const userId = req.query.id
     if (!userId) { return res.status(401).send('Unauthorized') }
 
+    const page = parseInt(req.query.page) || 1
+    const limit = 5
+    const offset = (page - 1) * limit
+
     const query = `
         SELECT i.*, t.id, t.item_id, t.issue_date, t.due_date
         FROM item i
         INNER JOIN transaction t ON i.id = t.item_id
         WHERE t.user_id = ? AND t.return_date IS NULL
+        LIMIT ${limit} OFFSET ${offset}
     `;
 
     connection.query(query, [userId], (err, results) => {

@@ -9,12 +9,9 @@ import SignUp from './views/SignUp';
 import Dashboard from './views/AdminViews/Dashboard';
 import Catalog from './views/AdminViews/Catalog';
 import Authors from './views/AdminViews/Authors';
-import Publishers from './views/AdminViews/Publishers';
-import Tags from './views/AdminViews/Tags';
 
 import Member from './views/AdminViews/Member';
 import Circulation from './views/AdminViews/Circulation';
-import FeesAndPayments from './views/AdminViews/FeesAndPayments';
 
 //-- Member Views
 import Home from './views/MemberViews/Home';
@@ -34,13 +31,9 @@ function App() {
 
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/catalog' element={<Catalog />} />
-        <Route path='/authors' element={<Authors />} />
-        <Route path='/publishers' element={<Publishers />} />
-        <Route path='/tags' element={<Tags />} />
 
         <Route path='/member' element={<Member />} />
         <Route path='/circulation' element={<Circulation />} />
-        <Route path='/fees-and-payments' element={<FeesAndPayments />} />
 
         {/* Member Routes */}
 
