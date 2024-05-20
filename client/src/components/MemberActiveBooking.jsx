@@ -20,7 +20,7 @@ function MemberActiveBooking() {
 		others: 'Others',
 	};
 
-	const fetchData = async (userId) => {
+	const fetchActiveTransactionHistory = async (userId) => {
 		try {
 			const response = await fetch(`http://localhost:3000/getActiveTransactions?id=${userId}&page=${page}`)
 
@@ -44,7 +44,7 @@ function MemberActiveBooking() {
 			if (response.ok) {
 				const data = await response.json()
 				console.log(data.message) // Log succes message
-				await fetchData()
+				await fetchActiveTransactionHistory()
 			} else {
 				console.error('failed to return book.')
 				// Handle error message (optional)
@@ -56,9 +56,9 @@ function MemberActiveBooking() {
 	}
 
 	useEffect(() => {
-		const fetchData = async() => {
+		const fetchData = async () => {
 			try {
-				const data = await fetchData(userId)
+				const data = await fetchActiveTransactionHistory(userId)
 				setTransactions(data)
 			} catch (error) { console.error(error) }
 		}
@@ -68,14 +68,14 @@ function MemberActiveBooking() {
 	const handlePrevPage = async () => { 
 		if (page > 1) {
 			setPage(page - 1) 
-			const data = await fetchData(page - 1)
+			const data = await fetchActiveTransactionHistory(page - 1)
 			setTransactions(data)
 		} 
 	};
 	const handleNextPage = async () => {
 		if (transactions.length === 5) {
 			setPage(page + 1); 
-			const data = await fetchData(page + 1)
+			const data = await fetchActiveTransactionHistory(page + 1)
 			setTransactions(data)
 		}
 	};
