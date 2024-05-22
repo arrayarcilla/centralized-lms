@@ -1,7 +1,6 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from 'react-router-dom';
-
-import { Form, FormGroup, FormField, Input, Button, Message, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
+import { Form, FormField, Input, Button, Message, Header, Image, Grid, GridRow, GridColumn, Divider } from "semantic-ui-react";
 
 const RegisterForm = () => {
     const [formData, setFormData] = useState({
@@ -10,8 +9,8 @@ const RegisterForm = () => {
         confirmp: "",
     });
 
-    const [passError, setPassError] = useState(false)
-    const [fieldError, setFieldError] = useState(false)
+    const [passError, setPassError] = useState(false);
+    const [fieldError, setFieldError] = useState(false);
 
     const navigate = useNavigate();
 
@@ -22,15 +21,15 @@ const RegisterForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        console.log(formData)
+        console.log(formData);
 
         if (formData.username === '' || formData.password === '' || formData.confirmp === '') {
-            console.error('Missing form data')
-            setFieldError(true)
+            console.error('Missing form data');
+            setFieldError(true);
         } else {
             if (formData.password !== formData.confirmp) {
-                console.error('Passwords do not match')
-                setPassError(true)
+                console.error('Passwords do not match');
+                setPassError(true);
             } else {
                 try {
                     const response = await fetch('http://localhost:3000/create_user', {
@@ -53,19 +52,13 @@ const RegisterForm = () => {
                         console.error('Error submitting data');
                     }
                 } catch (err) {
-                    console.error('Error: ', err)
+                    console.error('Error: ', err);
                 }
             }
         }
-
-        
-
-
-       
     }
-    
 
-    return(
+    return (
         <Grid container>
             <GridRow centered>
                 <GridColumn textAlign="center" width={8}>
@@ -73,29 +66,38 @@ const RegisterForm = () => {
                 </GridColumn>
             </GridRow>
 
-            <Divider width={1}/>
+            <Divider width={1} />
 
             <GridRow centered>
                 <GridColumn textAlign="left" width={8}>
-                <p >Fill up the fields below to register and create your account, then you can start using SandL Library!</p>
+                    <p>Fill up the fields below to register and create your account, then you can start using SandL Library!</p>
                 </GridColumn>
             </GridRow>
 
             <Divider />
-            
+
             <GridRow>
             </GridRow>
             <GridRow centered>
                 <GridColumn width={3}>
-                    <Image src="logo.png" size="small" floated="right"/>
+                    <Image src="logo.png" size="small" floated="right" />
                 </GridColumn>
                 <GridColumn width={5}>
                     <Form onSubmit={handleSubmit}>
-                        <FormField control={Input} name='username' label='Username' placeholder='Username' onChange={handleChange}/>
+                        <FormField>
+                            <label htmlFor='username'>Username</label>
+                            <Input id='username' name='username' placeholder='Username' onChange={handleChange} />
+                        </FormField>
                         <p className="form-description">Please choose a unique username.</p>
-                        <FormField control={Input} name='password' label='Password' placeholder='Password' onChange={handleChange} type='password' />
+                        <FormField>
+                            <label htmlFor='password'>Password</label>
+                            <Input id='password' name='password' placeholder='Password' onChange={handleChange} type='password' />
+                        </FormField>
                         <p className="form-description">Please enter your password.</p>
-                        <FormField control={Input} name='confirmp' label='Confirm Password' placeholder='Confirm Password' onChange={handleChange} type='password' />
+                        <FormField>
+                            <label htmlFor='confirmp'>Confirm Password</label>
+                            <Input id='confirmp' name='confirmp' placeholder='Confirm Password' onChange={handleChange} type='password' />
+                        </FormField>
                         <p className="form-description">Confirm your password by entering it again.</p>
                         <Grid>
                             <GridRow>
@@ -107,10 +109,9 @@ const RegisterForm = () => {
                     {fieldError && <Message error icon='warning sign' header='Incomplete Information' content='Please fill up all fields to continue registration' />}
                     {passError && <Message error icon='warning sign' header='Invalid Password' content='Passwords do not match, please confirm your password by re-entering it.' />}
                 </GridColumn>
-            </GridRow>  
+            </GridRow>
         </Grid>
     );
-    
 }
 
 export default RegisterForm;
