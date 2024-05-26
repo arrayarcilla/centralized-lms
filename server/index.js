@@ -6,14 +6,10 @@ const saltRounds = 10;
 const cors = require('cors'); // Import cors package
 
 const app = express();
-const port = 3000;
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors({
-    origin: 'http://localhost:3001'
-}));
 
 app.use(session({
     secret: 'ssshhhhh', //random string i guess
@@ -50,69 +46,103 @@ app.post('/', (req, res) => {
 })
 
 app.post('/create_user', (req, res) => {
-    console.log(req.body);
-    const usertype = "member"
-    let salt = bcrypt.genSaltSync(saltRounds);
-    let hash = bcrypt.hashSync(req.body.password, salt);
-    console.log("hash: ", hash)
+    const { username, password } = req.body;
+    const usertype = 'member';
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(password, salt);
 
-    connection.query('INSERT INTO user (name, password, userType) VALUES ("' + req.body.username + '","' + hash + '","' + usertype + '")', (err, result) => {
-        if (err) throw err
-        res.json({success: true})
-    })
-})
+    connection.query(
+        `INSERT INTO user (name, password, userType) VALUES (?, ?, ?)`,
+        [username, hash, usertype],
+        (err, result) => {
+            if (err) {
+                console.error('Error inserting user:', err);
+                return res.status(500).json({ error: 'Error inserting user' });
+            }
+
+            console.log('Inserted user:', result);
+            return res.status(201).json({ success: true });
+        }
+    );
+});
 
 
 //--------------------------------------ITEMS-----------------------------------------
 
 app.delete('/deleteItem', (req, res) => {
-    console.log('deleted yay')
     connection.query(
         `UPDATE item
         SET is_deleted = 1
-        WHERE id = `+ req.body.id +`;`, (err, result) => {
+        WHERE id = ` + req.body.id + `;`, (err, result) => {
+        console.log("restult", result)
+        console.log("id",req.body.id)
+        if (err) {
+            console.error('Error deleting item: ', err);
+            return res.status(404).json({ message: 'Internal server error' });
+        }
+        res.status(200).json({ message: 'Item deleted successfully' });
     });
 });
 
-app.post('/addItem', (req, res) => {
-    const item = req.body
-    try {
-        connection.query(`INSERT INTO item (author, title, isbn, category, publisher, year, available, copies)
-            VALUES ( "`+ item.author +`", "`+ item.title +`", "`+ item.isbn +`", "`+ item.category +`", "`+ item.publisher +`", `+ item.year +`, `+ item.copies +`, `+ item.copies +`);`, (err, result) => {
-            if (err) throw err;
-        })
-        console.log('Item added successfully: ', req.body)
-        res.status(201).send('Item added successfully');
-    } catch (error) {
-        console.error('Error adding item: ', error);
-        res.status(500).send('Error adding item');
-    }
-})
+// app.post('/addItem', async (req, res) => {
+//     const item = req.body
+//     try {
+//         connection.query(`INSERT INTO item (author, title, isbn, category, publisher, year, available, copies)
+//             VALUES ( "`+ item.author +`", "`+ item.title +`", "`+ item.isbn +`", "`+ item.category +`", "`+ item.publisher +`", `+ item.year +`, `+ item.copies +`, `+ item.copies +`);`, (err, result) => {
+//             if (err) throw err;
+//             console.log("result",result)
+//             res.status(201).send(result);
+//         })
+        
+//     } catch (error) {
+//         console.error('Error adding item: ', error);
+//         res.status(500).send('Error adding item');
+//     }
+// })
 
-app.patch('/updateItem', async (req, res) => {
-    const item = req.body
-    const newCopies = item.currentCopies + item.addedCopies
 
+app.post("/addItem", (req, res) => {
+    const { author, title, isbn, category, publisher, year, copies} = req.body;
+    const result = connection.query(
+      `INSERT INTO item (author, title, isbn, category, publisher, year, available, copies) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [author, title, isbn, category, publisher, year, copies, copies],
+      (error, results) => {
+          if (error) {
+              console.error('Error inserting item:', error);
+                return res.status(500).send("Error adding item"); 
+          }
+
+          return res.status(201).send('Item added successfully');
+      }
+    );
+  });
+
+  app.patch('/updateItem', async (req, res) => {
+    const item = req.body;
     try {
-        // Perform the update to the database
-        connection.query(`UPDATE item
-                        SET author = "`+ item.author +`",
-                            title = "`+ item.title +`",
-                            isbn = '`+ item.isbn +`',
-                            category = '`+ item.category +`',
-                            publisher = "`+ item.publisher +`",
-                            year = '`+ item.year +`',
-                            available = available + '`+ item.addedCopies +`',
-                            copies = `+ newCopies +`
-                        WHERE id = `+ item.id +`;`, (err, result) => {
-            if (err) throw err
-            res.send('product')
-        })
+      const sql = `UPDATE item
+                   SET author = ?,
+                       title = ?,
+                       isbn = ?,
+                       category = ?,
+                       publisher = ?,
+                       year = ?,
+                       available = available + ?,
+                       copies = ?
+                   WHERE id = ?`;
+      const values = [item.author, item.title, item.isbn, item.category, item.publisher, item.year, item.addedCopies, item.copies, item.id];
+  
+      await connection.query(sql, values, (err, result) => {
+        console.log("result", result)
+        if (err) throw err;
+        res.status(200).send('Item updated successfully'); // Updated status code to 200 for update
+      });
     } catch (error) {
-        console.error('Error updating item: ', error)
-        res.status(500).json({ message: 'Internal server error' })
+      console.error('Error updating item: ', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
-})
+  });
 
 // app.get('/getAvail', (req, res) => {
 //     connection.query('SELECT * FROM item WHERE status="1"', (err, result) => {
@@ -123,6 +153,7 @@ app.patch('/updateItem', async (req, res) => {
 // Route to get items with pagination
 app.get('/items', async (req, res) => {
     try {
+        console.log("req.query", req.query)
         const page = parseInt(req.query.page) || 1;
         const limit = 10;
         const offset = (page - 1) * limit;
@@ -145,10 +176,15 @@ app.get('/items', async (req, res) => {
 
         res.status(200).json(results);
     } catch (error) {
-        console.error('Error retrieving items:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        if (error.message === 'Invalid page number') {
+            res.status(400).json({ error: 'Invalid page number' });
+        } else {
+            console.error('Error retrieving items:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 });
+
 
   // Search book function
 app.get('/search', (req, res) => {
@@ -171,11 +207,15 @@ app.get('/search', (req, res) => {
         LIMIT ${itemsPerPage} OFFSET ${offset}
         `;
         connection.query(sqlQuery, (err, results) => {
-        if (err) {
-            console.error('Error executing MySQL query: ' + err.stack);
-            res.status(500).json({ error: 'Internal server error' });
+            if (err) {
+                console.error('Error executing MySQL query:', err);
+            if (err.code) { // Check for specific error codes (e.g., database errors)
+                res.status(500).json({ error: 'Database error' });
+            } else {
+                res.status(400).json({ error: 'Invalid search query or category' }); // Adjust status code as needed
+            }
             return;
-        }
+            }
         res.json(results);
         });
     } catch (error) {
@@ -185,35 +225,41 @@ app.get('/search', (req, res) => {
 });
   
 // Shows all users who returned and borrowed the book
-app.get('/getItemBorrowHistory', (req, res) => {
+app.get('/getItemBorrowHistory', async (req, res) => {
     try {
-        const bookId = parseInt(req.query.book_id)
-        const page = parseInt(req.query.page) || 1
-        const itemsPerPage = 10
-        const offset = (page - 1) * itemsPerPage
-        if (isNaN(page) || page < 1) { throw new Error ('Invalid page number') }
+        const bookId = parseInt(req.query.book_id);
+        const page = parseInt(req.query.page);
 
-        const sqlQuery=`
+        if (isNaN(page) || page < 1) {
+            return res.status(400).json({ error: 'Invalid page number' });
+        }
+
+        const itemsPerPage = 10;
+        const offset = (page - 1) * itemsPerPage;
+
+        const sql = `
             SELECT t.id AS transaction_id, t.return_date, u.id, u.name
             FROM transaction t
             INNER JOIN user u ON t.user_id = u.id
-            WHERE t.item_id = ${bookId} AND t.return_date IS NOT NULL
+            WHERE t.item_id = ? AND t.return_date IS NOT NULL
             ORDER BY t.id DESC
-            LIMIT ${itemsPerPage} OFFSET ${offset}
-        `
+            LIMIT ? OFFSET ?
+        `;
 
-        connection.query(sqlQuery, (err, results) => {
-            if (err) {
-                console.error('Error executing MySQL query: ' + err.stack)
-                res.status(500).json({ error: 'Internal server error' })
-                return
-            } res.json(results)
-        })
+        const [results] = await connection.query(sql, [bookId, itemsPerPage, offset]);
+
+        if (!results || !Array.isArray(results) || results.length === 0) {
+            return res.status(404).json({ error: 'No borrow history found' });
+        }
+
+        console.log("results", results);
+        res.json(results);
     } catch (error) {
-        console.error('Error retrieving items: ', error)
-        res.status(500).json({ error: 'Internal server error' })
+        console.error('Error retrieving items:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-})
+});
+  
 
 app.post('/getItem', (req, res) => {
     connection.query(`SELECT * FROM item WHERE id="`+ req.body.id+`"`, (err, result) => {
@@ -227,8 +273,6 @@ app.post('/borrowBook', (req, res) => {
     const userId = req.body.userId
     const bookId  = req.body.bookId
 
-    console.log('user id: ', req.body.userId)
-
     // Check book availability
     connection.query(
         'SELECT available FROM item WHERE id = ?', [bookId], (err, results) => {
@@ -236,6 +280,8 @@ app.post('/borrowBook', (req, res) => {
                 console.error(err)
                 return res.status(500).send({ error: 'An error has occured' })
             }
+
+            console.log("results",results)
 
             if (results.length === 0) { return res.status(404).send({ error: 'Book not found' }) }
 
@@ -273,31 +319,53 @@ app.post('/borrowBook', (req, res) => {
     )
 })
 
-app.post('/returnBook', (req, res) => {
-    const transactionId = req.body.transactionId
-    const bookId = req.body.itemId
+app.post('/returnBook', async (req, res) => {
+    const transactionId = req.body.transactionId;
+    const bookId = req.body.itemId;
 
     try {
         // Update transaction with return date
-        connection.query(
-          `UPDATE transaction SET return_date = ? WHERE id = ?`, [new Date(), transactionId], (err, results) => {
-            if (err) {
-                console.error(err)
-                return res.status(500).send({ error: 'An error has occured' })
-            }
-            // Update item availability
-            connection.query(`UPDATE item SET available = available + 1 WHERE id = ?`, [bookId], (err, result) => {
-                if (err) {
-                    console.error(err)
-                    return res.status(500).send({ error: 'An error occured' })
+        await new Promise((resolve, reject) => {
+            connection.query(
+                `UPDATE transaction SET return_date = ? WHERE id = ?`,
+                [new Date(), transactionId],
+                (err, results) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    } else if (results.affectedRows === 1) {
+                        resolve(results);
+                    } else {
+                        const err = new Error('item not found');
+                        err.statusCode = 404;
+                        reject(err)
+                    }
                 }
-            });
-          }
-        );
+            );
+        });
+
+        // Update item availability
+        await new Promise((resolve, reject) => {
+            connection.query(
+                `UPDATE item SET available = available + 1 WHERE id = ?`,
+                [bookId],
+                (err, result) => {
+                    if (err) {
+                        console.error(err);
+                        reject(err);
+                    } else {
+                        resolve(result);
+                    }
+                }
+            );
+        });
+
+        // Send success response after all operations are completed
         res.status(200).json({ message: 'Item returned successfully' });
     } catch (error) {
+        console.log("error", error)
         console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(404).json({ error: 'transaction not found' });
     }
 });
 
@@ -327,35 +395,40 @@ app.get('/getAllTransactions', (req, res) => {
 
 // Route that gets all transactions of a GIVEN USER ID
 app.get('/getAllTransactionsPerId', (req, res) => {
-    const userId = req.query.id
-    if (!userId) { return req.status(401).send('Unauthorized') }
-    
-    const page = parseInt(req.query.page) || 1
-    const limit = 5
-    const offset = (page - 1) * limit
+    try {
+        const userId = req.query.id;
+        if (!userId) { return res.status(401).send('Unauthorized'); }
+        
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const offset = (page - 1) * limit;
 
-    if (isNaN(page) || page < 1) {
-        return res.status(400).send('Invalid page number')
-    }
-
-    const query = `
-        SELECT i.*, t.*
-        FROM item i
-        INNER JOIN transaction t ON i.id = t.item_id
-        WHERE t.user_id = ?
-        ORDER BY CAST(t.return_date AS DATE) ASC
-        LIMIT ${limit} OFFSET ${offset}
-    `;
-
-    connection.query(query, [userId], (err, results) => {
-        if (err) {
-            console.error(err)
-            return res.status(500).send('Error fetching active transactions')
+        if (isNaN(page) || page < 1) {
+            return res.status(400).send('Invalid page number');
         }
 
-        res.send(results)
-    })
-})
+        const query = `
+            SELECT i.*, t.*
+            FROM item i
+            INNER JOIN transaction t ON i.id = t.item_id
+            WHERE t.user_id = ?
+            ORDER BY CAST(t.return_date AS DATE) ASC
+            LIMIT ${limit} OFFSET ${offset}
+        `;
+
+        connection.query(query, [userId], (err, results) => {
+            if(results.length === 0){
+                console.error('Error fetching active transactions:', err);
+                return res.status(500).send('Internal server error');
+            }
+            console.log("results", results)
+            res.send(results);
+        });
+    } catch (error) {
+        console.error('Error handling getAllTransactionsPerId:', error);
+        res.status(500).send('Internal server error');
+    }
+});
 
 // Route that gets all currently borrowed books of a user
 app.get('/getActiveTransactions', (req, res) => {
@@ -404,11 +477,10 @@ app.get('/getBorrowHistory', (req, res) => {
     `;
 
     connection.query(query, [userId], (err, results) => {
-        if (err) {
+        if (results.length === 0) {
             console.error(err);
             return res.status(500).send('Error fetching active transactions')
         }
-
         res.send(results)
     })
 });
@@ -416,7 +488,7 @@ app.get('/getBorrowHistory', (req, res) => {
 // Route to get user list with pagination
 app.get('/users', async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1
+        const page = parseInt(req.query.page)
         const limit = 10
         const offset = (page - 1) * limit
         if (isNaN(page) || page < 1) {
@@ -436,7 +508,7 @@ app.get('/users', async (req, res) => {
         res.status(200).json(results)
     } catch (error) {
         console.error('Error retrieving users: ', error)
-        res.status(500).json({ error: 'Internal server error' })
+        res.status(400).json({ error: 'Invalid page number' })
     }
 })
 
@@ -468,8 +540,4 @@ app.get('/searchMember', async (req, res) => {
 })
 
 
-//------------------------------------------------LISTEN----------------------------------------------------
-
-app.listen(port, () => {
-    console.log('Server listening on port ' + port);
-})
+module.exports = app;
