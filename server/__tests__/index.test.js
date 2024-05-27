@@ -399,7 +399,7 @@ it('should handle invalid page numbers', async () => {
 
   // Assert the response status code and content
   expect(res.statusCode).toEqual(400);
-  expect(res.body).toHaveProperty('error', 'Invalid page number');
+  expect(res.body).toEqual({ error: 'Invalid page number' });
 });
 
 it('should handle internal server errors gracefully', async () => {

@@ -26,7 +26,7 @@ const connection = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
     password: "",
-    database: "centralized_library" // use "centralized_library_clone" for testing, make sure u have the same database name applied in ur mySQL"
+    database: "centralized_library_clone" // use "centralized_library_clone" for testing, make sure u have the same database name applied in ur mySQL"
 })
 
 app.post('/', (req, res) => {
@@ -212,7 +212,7 @@ app.get('/search', (req, res) => {
 app.get('/getItemBorrowHistory', (req, res) => {
     try {
         const bookId = parseInt(req.query.book_id)
-        const page = parseInt(req.query.page) || 1
+        const page = parseInt(req.query.page)
         const itemsPerPage = 10
         const offset = (page - 1) * itemsPerPage
         if (isNaN(page) || page < 1) { return res.status(400).json({ error: 'Invalid page number' }) }
