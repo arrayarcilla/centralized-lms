@@ -8,7 +8,6 @@ import {
     Icon,
     Menu,
     Sidebar,
-    Popup,
 } from "semantic-ui-react";
 
 

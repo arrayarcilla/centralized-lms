@@ -15,9 +15,10 @@ function ItemBorrowHistory({id}) {
 
 	const bookId = id
 
-	const fetchItemBorrowHistory = async (bookId, page) => {
+	const fetchItemBorrowHistory = async () => {
         try {
 			setIsLoading(true)
+			console.log(page)
             const response = await fetch(`http://localhost:3000/getItemBorrowHistory?book_id=${bookId}&page=${page}`);
             if (!response.ok) { throw new Error('Unauthorized or failed to fetch data'); }         
 			const data = await response.json();

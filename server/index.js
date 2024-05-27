@@ -6,10 +6,15 @@ const saltRounds = 10;
 const cors = require('cors'); // Import cors package
 
 const app = express();
+const port = 3000
 
 const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(cors({
+    origin: 'http://localhost:3001'
+}))
 
 app.use(session({
     secret: 'ssshhhhh', //random string i guess
@@ -21,7 +26,7 @@ const connection = mysql.createConnection({
     host: "127.0.0.1",
     user: "root",
     password: "",
-    database: "centralized_library"
+    database: "centralized_library" // use "centralized_library_clone" for testing, make sure u have the same database name applied in ur mySQL"
 })
 
 app.post('/', (req, res) => {
@@ -60,7 +65,6 @@ app.post('/create_user', (req, res) => {
                 return res.status(500).json({ error: 'Error inserting user' });
             }
 
-            console.log('Inserted user:', result);
             return res.status(201).json({ success: true });
         }
     );
@@ -74,8 +78,6 @@ app.delete('/deleteItem', (req, res) => {
         `UPDATE item
         SET is_deleted = 1
         WHERE id = ` + req.body.id + `;`, (err, result) => {
-        console.log("restult", result)
-        console.log("id",req.body.id)
         if (err) {
             console.error('Error deleting item: ', err);
             return res.status(404).json({ message: 'Internal server error' });
@@ -83,22 +85,6 @@ app.delete('/deleteItem', (req, res) => {
         res.status(200).json({ message: 'Item deleted successfully' });
     });
 });
-
-// app.post('/addItem', async (req, res) => {
-//     const item = req.body
-//     try {
-//         connection.query(`INSERT INTO item (author, title, isbn, category, publisher, year, available, copies)
-//             VALUES ( "`+ item.author +`", "`+ item.title +`", "`+ item.isbn +`", "`+ item.category +`", "`+ item.publisher +`", `+ item.year +`, `+ item.copies +`, `+ item.copies +`);`, (err, result) => {
-//             if (err) throw err;
-//             console.log("result",result)
-//             res.status(201).send(result);
-//         })
-        
-//     } catch (error) {
-//         console.error('Error adding item: ', error);
-//         res.status(500).send('Error adding item');
-//     }
-// })
 
 
 app.post("/addItem", (req, res) => {
@@ -134,7 +120,6 @@ app.post("/addItem", (req, res) => {
       const values = [item.author, item.title, item.isbn, item.category, item.publisher, item.year, item.addedCopies, item.copies, item.id];
   
       await connection.query(sql, values, (err, result) => {
-        console.log("result", result)
         if (err) throw err;
         res.status(200).send('Item updated successfully'); // Updated status code to 200 for update
       });
@@ -153,7 +138,6 @@ app.post("/addItem", (req, res) => {
 // Route to get items with pagination
 app.get('/items', async (req, res) => {
     try {
-        console.log("req.query", req.query)
         const page = parseInt(req.query.page) || 1;
         const limit = 10;
         const offset = (page - 1) * limit;
@@ -225,40 +209,44 @@ app.get('/search', (req, res) => {
 });
   
 // Shows all users who returned and borrowed the book
-app.get('/getItemBorrowHistory', async (req, res) => {
+app.get('/getItemBorrowHistory', (req, res) => {
     try {
-        const bookId = parseInt(req.query.book_id);
-        const page = parseInt(req.query.page);
+        const bookId = parseInt(req.query.book_id)
+        const page = parseInt(req.query.page) || 1
+        const itemsPerPage = 10
+        const offset = (page - 1) * itemsPerPage
+        if (isNaN(page) || page < 1) { return res.status(400).json({ error: 'Invalid page number' }) }
 
-        if (isNaN(page) || page < 1) {
-            return res.status(400).json({ error: 'Invalid page number' });
-        }
-
-        const itemsPerPage = 10;
-        const offset = (page - 1) * itemsPerPage;
-
-        const sql = `
+        const sqlQuery=`
             SELECT t.id AS transaction_id, t.return_date, u.id, u.name
             FROM transaction t
             INNER JOIN user u ON t.user_id = u.id
-            WHERE t.item_id = ? AND t.return_date IS NOT NULL
+            WHERE t.item_id = ${bookId} AND t.return_date IS NOT NULL
             ORDER BY t.id DESC
-            LIMIT ? OFFSET ?
-        `;
+            LIMIT ${itemsPerPage} OFFSET ${offset}
+        `
 
-        const [results] = await connection.query(sql, [bookId, itemsPerPage, offset]);
-
-        if (!results || !Array.isArray(results) || results.length === 0) {
-            return res.status(404).json({ error: 'No borrow history found' });
-        }
-
-        console.log("results", results);
-        res.json(results);
+        connection.query(sqlQuery, [bookId], (err, results) => {
+            if (err) {
+              console.error('Error executing MySQL query: ' + err.stack);
+              res.status(500).json({ error: 'Internal server error' });
+              return;
+            }
+      
+            // Check for empty results
+            if (results.length === 0) {
+              res.status(404).json({ error: 'Book not found' }); // Use 404 for non-existent book
+            } else {
+              res.json(results);
+            }
+        });
     } catch (error) {
-        console.error('Error retrieving items:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('Error retrieving items: ', error)
+        res.status(500).json(error)
     }
-});
+})
+
+
   
 
 app.post('/getItem', (req, res) => {
@@ -278,16 +266,14 @@ app.post('/borrowBook', (req, res) => {
         'SELECT available FROM item WHERE id = ?', [bookId], (err, results) => {
             if (err) {
                 console.error(err)
-                return res.status(500).send({ error: 'An error has occured' })
+                return res.status(500).json({ error: 'An error has occured' })
             }
 
-            console.log("results",results)
-
-            if (results.length === 0) { return res.status(404).send({ error: 'Book not found' }) }
+            if (results.length === 0) { return res.status(404).json({error: 'Book not found'}) }
 
             const { available } = results[0]
 
-            if (available <= 0) { return res.status(400).send({ error: 'Book is not currently available' }) }
+            if (available <= 0) { return res.status(404).json({ error: 'Book is not currently available' }) }
 
             // Create transaction record
             const issueDate = new Date()
@@ -397,7 +383,7 @@ app.get('/getAllTransactions', (req, res) => {
 app.get('/getAllTransactionsPerId', (req, res) => {
     try {
         const userId = req.query.id;
-        if (!userId) { return res.status(401).send('Unauthorized'); }
+        if (!userId || isNaN(userId)) { return res.status(401).send('Unauthorized'); }
         
         const page = parseInt(req.query.page) || 1;
         const limit = 5;
@@ -417,13 +403,19 @@ app.get('/getAllTransactionsPerId', (req, res) => {
         `;
 
         connection.query(query, [userId], (err, results) => {
-            if(results.length === 0){
-                console.error('Error fetching active transactions:', err);
-                return res.status(500).send('Internal server error');
+            if (err) {
+              console.error('Error executing MySQL query: ' + err.stack);
+              res.status(500).json({ error: 'Internal server error' });
+              return;
             }
-            console.log("results", results)
-            res.send(results);
-        });
+      
+            // Check for empty results
+            if (results.length === 0) {
+              res.status(404).send('User not found'); // Use 404 for non-existent user
+            } else {
+              res.json(results);
+            }
+          });
     } catch (error) {
         console.error('Error handling getAllTransactionsPerId:', error);
         res.status(500).send('Internal server error');
@@ -459,31 +451,49 @@ app.get('/getActiveTransactions', (req, res) => {
 
 // Route that gets all returned books of a user
 app.get('/getBorrowHistory', (req, res) => {
-    const userId = req.query.id;
-    const page = parseInt(req.query.page) || 1
-    const limit = 10
-    const offset = (page - 1) * limit
-
-    if (!userId) {
-        return res.status(401).send('Unauthorized')
-    }
-    const query = `
-    SELECT i.*, t.id, t.item_id, t.return_date
-    FROM item i
-    INNER JOIN transaction t ON i.id = t.item_id
-    WHERE t.user_id = ? AND t.return_date IS NOT NULL AND t.return_date <> '0000-00-00'
-    ORDER BY t.return_date DESC
-    LIMIT ${limit} OFFSET ${offset};
-    `;
-
-    connection.query(query, [userId], (err, results) => {
-        if (results.length === 0) {
-            console.error(err);
-            return res.status(500).send('Error fetching active transactions')
+    try {
+      // Validate user ID (presence and type)
+      const userId = req.query.id;
+      if (!userId || isNaN(parseInt(userId))) {
+        return res.status(401).send('Unauthorized');
+      }
+  
+      // Validate page number (optional, but recommended for pagination)
+      const page = parseInt(req.query.page) || 1;
+      if (isNaN(page) || page < 1) {
+        return res.status(400).send('Invalid page number');
+      }
+  
+      const limit = 10; // Adjust limit as needed
+      const offset = (page - 1) * limit;
+  
+      const query = `
+        SELECT i.*, t.id, t.item_id, t.return_date
+        FROM item i
+        INNER JOIN transaction t ON i.id = t.item_id
+        WHERE t.user_id = ? AND t.return_date IS NOT NULL AND t.return_date <> '0000-00-00'
+        ORDER BY t.return_date DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `;
+  
+      connection.query(query, [userId], (err, results) => {
+        if (err) {
+          console.error('Error executing MySQL query:', err.stack);
+          return res.status(500).json({ error: 'Internal server error' });
         }
-        res.send(results)
-    })
-});
+  
+        // Check for empty results (no borrow history)
+        if (results.length === 0) {
+          res.status(404).send('No borrow history found');
+        } else {
+          res.json(results);
+        }
+      });
+    } catch (error) {
+      console.error('Error retrieving borrow history:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
 
 // Route to get user list with pagination
 app.get('/users', async (req, res) => {
@@ -492,7 +502,7 @@ app.get('/users', async (req, res) => {
         const limit = 10
         const offset = (page - 1) * limit
         if (isNaN(page) || page < 1) {
-            throw new Error('Invalid page number')
+            return res.status(400).json({ error: 'Invalid page number' })
         }
 
         const sqlQuery = `
@@ -508,7 +518,7 @@ app.get('/users', async (req, res) => {
         res.status(200).json(results)
     } catch (error) {
         console.error('Error retrieving users: ', error)
-        res.status(400).json({ error: 'Invalid page number' })
+        res.status(400).json(error)
     }
 })
 
@@ -539,5 +549,8 @@ app.get('/searchMember', async (req, res) => {
     }
 })
 
+app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
 
 module.exports = app;

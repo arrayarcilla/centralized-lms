@@ -15,7 +15,7 @@ function AllBorrowHistory({id}) {
 
 	const userId = id
 
-	const fetchAllTransactionHistory = async (userId, page) => {
+	const fetchAllTransactionHistory = async () => {
         try {
 			setIsLoading(true)
             const response = await fetch(`http://localhost:3000/getAllTransactionsPerId?id=${userId}&page=${page}`);
